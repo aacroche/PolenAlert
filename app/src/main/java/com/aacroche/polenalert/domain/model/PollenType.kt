@@ -9,10 +9,9 @@ enum class PollenType(val lowMax: Double, val medMax: Double) {
     RAGWEED(10.0, 30.0);
 
     fun levelFor(grainsPerM3: Double): PollenLevel = when {
-        grainsPerM3 <= 0.5 -> PollenLevel.NONE
+        grainsPerM3 < 1.0 -> PollenLevel.NONE
         grainsPerM3 <= lowMax -> PollenLevel.LOW
         grainsPerM3 <= medMax -> PollenLevel.MEDIUM
-        grainsPerM3 > medMax -> PollenLevel.HIGH
         else -> PollenLevel.HIGH
     }
 }
