@@ -8,8 +8,6 @@ import java.util.TimeZone
 data class AirQualityResponseDto(
     var latitude: Double,
     var longitude: Double,
-    var generationtime_ms: Double,
-    var utc_offset_seconds: Int,
     var timezone: String,
     var hourly: HourlyPollenDto,
 )
