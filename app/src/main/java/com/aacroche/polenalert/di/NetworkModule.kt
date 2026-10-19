@@ -1,6 +1,6 @@
 package com.aacroche.polenalert.di
 
-import com.aacroche.polenalert.data.remote.dto.PollenApi
+import com.aacroche.polenalert.data.remote.PollenApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

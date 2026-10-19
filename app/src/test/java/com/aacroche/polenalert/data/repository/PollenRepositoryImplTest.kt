@@ -1,9 +1,8 @@
-package com.aacroche.polenalert.mapper
+package com.aacroche.polenalert.data.repository
 
 import com.aacroche.polenalert.data.remote.dto.AirQualityResponseDto
 import com.aacroche.polenalert.data.remote.dto.HourlyPollenDto
-import com.aacroche.polenalert.data.remote.dto.PollenApi
-import com.aacroche.polenalert.data.repository.PollenRepositoryImpl
+import com.aacroche.polenalert.data.remote.PollenApi
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
 import junit.framework.TestCase.assertEquals
