@@ -6,6 +6,7 @@ import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.repository.PollenRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 import java.io.IOException
@@ -24,7 +25,7 @@ class PollenRepositoryImpl(private val pollenApi: PollenApi) : PollenRepository 
             DataResult.Error(DataError.SERVER)
         } catch (e: SerializationException) {
             DataResult.Error(DataError.UNKNOWN)
-        } catch (e: Exception) {
+        } catch (e: CancellationException) {
             DataResult.Error(DataError.UNKNOWN)
         }
     }

@@ -8,7 +8,7 @@ import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Test
 import retrofit2.HttpException
@@ -34,7 +34,7 @@ class PollenRepositoryImplTest {
     }
 
     @Test
-    fun `getDailyPollen returns Success with mapped days when API succeeds`() = runBlocking {
+    fun `getDailyPollen returns Success with mapped days when API succeeds`() = runTest {
         val dto = AirQualityResponseDto(
             latitude = 40.42,
             longitude = -3.70,
@@ -56,7 +56,7 @@ class PollenRepositoryImplTest {
     }
 
     @Test
-    fun `getDailyPollen returns Error NO_CONNECTION when API throws IOException`() = runBlocking {
+    fun `getDailyPollen returns Error NO_CONNECTION when API throws IOException`() = runTest {
         val api = FakePollenApi(error = IOException("Network error"))
         val repository = PollenRepositoryImpl(api)
 
@@ -66,7 +66,7 @@ class PollenRepositoryImplTest {
     }
 
     @Test
-    fun `getDailyPollen returns Error SERVER when API throws HttpException`() = runBlocking {
+    fun `getDailyPollen returns Error SERVER when API throws HttpException`() = runTest {
         val httpException = HttpException(Response.error<Any>(500, "".toResponseBody()))
         val api = FakePollenApi(error = httpException)
         val repository = PollenRepositoryImpl(api)
