@@ -1,17 +1,17 @@
 package com.aacroche.polenalert.data.repository
 
-import com.aacroche.polenalert.data.remote.dto.PollenApi
+import com.aacroche.polenalert.data.remote.PollenApi
 import com.aacroche.polenalert.data.remote.mapper.AirQualityMapper.toDomain
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.repository.PollenRepository
-import kotlinx.coroutines.CancellationException
+import jakarta.inject.Inject
 import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 import java.io.IOException
 
-class PollenRepositoryImpl(private val pollenApi: PollenApi) : PollenRepository {
+class PollenRepositoryImpl @Inject constructor(private val pollenApi: PollenApi) : PollenRepository {
     override suspend fun getDailyPollen(
         latitude: Double,
         longitude: Double
@@ -24,8 +24,6 @@ class PollenRepositoryImpl(private val pollenApi: PollenApi) : PollenRepository 
         } catch (e: HttpException) {
             DataResult.Error(DataError.SERVER)
         } catch (e: SerializationException) {
-            DataResult.Error(DataError.UNKNOWN)
-        } catch (e: CancellationException) {
             DataResult.Error(DataError.UNKNOWN)
         }
     }
