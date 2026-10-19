@@ -1,5 +1,6 @@
-package com.aacroche.polenalert.data.remote.dto
+package com.aacroche.polenalert.data.remote
 
+import com.aacroche.polenalert.data.remote.dto.AirQualityResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
