@@ -83,10 +83,10 @@ class AirQualityMapperTest {
     fun `levelFor boundary values for grass and olive`() {
         assertEquals(PollenLevel.NONE, PollenType.GRASS.levelFor(0.9))
         assertEquals(PollenLevel.LOW, PollenType.GRASS.levelFor(1.0))
-        assertEquals(PollenLevel.LOW, PollenType.GRASS.levelFor(15.0))
-        assertEquals(PollenLevel.MEDIUM, PollenType.GRASS.levelFor(15.1))
+        assertEquals(PollenLevel.LOW, PollenType.GRASS.levelFor(25.0))
+        assertEquals(PollenLevel.MEDIUM, PollenType.GRASS.levelFor(25.1))
 
-        assertEquals(PollenLevel.MEDIUM, PollenType.OLIVE.levelFor(100.0))
-        assertEquals(PollenLevel.HIGH, PollenType.OLIVE.levelFor(100.1))
+        assertEquals(PollenLevel.MEDIUM, PollenType.OLIVE.levelFor(200.0))
+        assertEquals(PollenLevel.HIGH, PollenType.OLIVE.levelFor(200.1))
     }
 }
