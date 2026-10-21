@@ -3,8 +3,8 @@ package com.aacroche.polenalert.ui.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.R
+import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenType
 
 

@@ -1,10 +1,12 @@
 package com.aacroche.polenalert.ui.today
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,15 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,11 +33,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aacroche.polenalert.R
@@ -48,6 +49,8 @@ import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
 import com.aacroche.polenalert.ui.theme.getImg
 import com.aacroche.polenalert.ui.theme.labelRes
+import com.aacroche.polenalert.ui.theme.nameRes
+import com.aacroche.polenalert.ui.theme.scientificName
 
 @Composable
 fun TodayRoute(viewModel: TodayViewModel = hiltViewModel()) {
@@ -69,8 +72,15 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
                 }
 
                 is TodayUiState.Success -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(state.today.readings) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = state.today.readings,
+                            key = { it.type }
+                        ) {
                             PollenCard(it)
                         }
                     }
@@ -86,14 +96,14 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
                 }
 
                 is TodayUiState.Error -> {
-                    val errorTitle = when (state.error) {
-                        DataError.NO_CONNECTION -> stringResource(R.string.error_connection_title)
-                        DataError.SERVER -> stringResource(R.string.error_server_title)
-                        DataError.UNKNOWN -> stringResource(R.string.error_unknown_title)
+                    val (errorTitle, errorBody) = when (state.error) {
+                        DataError.NO_CONNECTION -> stringResource(R.string.error_connection_title) to stringResource(R.string.error_connection_message)
+                        DataError.SERVER -> stringResource(R.string.error_server_title) to stringResource(R.string.error_server_message)
+                        DataError.UNKNOWN -> stringResource(R.string.error_unknown_title) to stringResource(R.string.error_unknown_message)
                     }
                     MessageScreen(
                         title = errorTitle,
-                        body = state.error.toString(),
+                        body = errorBody,
                         actionText = stringResource(R.string.retry),
                         onAction = onRetry
                     )
@@ -135,37 +145,46 @@ private fun PollenLevelChipPreview() {
 @Composable
 fun PollenCard(todayPollen: PollenReading) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp)
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-            .background(MaterialTheme.colorScheme.background)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .fillMaxWidth()
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(11.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 painter = painterResource(todayPollen.type.getImg()),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(54.dp).clip(RoundedCornerShape(10.dp))
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(RoundedCornerShape(10.dp))
             )
             Column(
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = todayPollen.type.displayName(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = todayPollen.type.nameRes(),
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = todayPollen.type.scientificName(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "%.2f granos/m³".format(todayPollen.dailyMean),
+                    text = stringResource(R.string.grains_per_m3, todayPollen.dailyMean),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -174,26 +193,6 @@ fun PollenCard(todayPollen: PollenReading) {
             PollenLevelChip(todayPollen.level)
         }
     }
-}
-
-
-
-@Composable
-fun PollenType.displayName(): String = when (this) {
-    PollenType.ALDER -> stringResource(R.string.pollen_type_alder)
-    PollenType.BIRCH -> stringResource(R.string.pollen_type_birch)
-    PollenType.GRASS -> stringResource(R.string.pollen_type_grass)
-    PollenType.MUGWORT -> stringResource(R.string.pollen_type_mugwort)
-    PollenType.OLIVE -> stringResource(R.string.pollen_type_olive)
-    PollenType.RAGWEED -> stringResource(R.string.pollen_type_ragweed)
-}
-
-@Composable
-fun PollenLevel.displayName(): String = when (this) {
-    PollenLevel.NONE -> stringResource(R.string.pollen_level_none)
-    PollenLevel.LOW -> stringResource(R.string.pollen_level_low)
-    PollenLevel.MEDIUM -> stringResource(R.string.pollen_level_medium)
-    PollenLevel.HIGH -> stringResource(R.string.pollen_level_high)
 }
 
 @Composable

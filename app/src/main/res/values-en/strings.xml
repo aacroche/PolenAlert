@@ -9,8 +9,14 @@
 
     <!-- Errors -->
     <string name="error_connection_title">Connection Error</string>
+    <string name="error_connection_message">Check your internet connection and try again.</string>
     <string name="error_server_title">Server Error</string>
+    <string name="error_server_message">A server error occurred. Please try again later.</string>
     <string name="error_unknown_title">Unknown Error</string>
+    <string name="error_unknown_message">An unexpected error occurred.</string>
+
+    <!-- Units -->
+    <string name="grains_per_m3">%1$.1f grains/m³</string>
 
     <!-- Pollen Levels -->
     <string name="pollen_level_none">None</string>
