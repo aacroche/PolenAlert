@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">PolenAlert</string>
+
+    <!-- General / Actions -->
+    <string name="retry">Reintentar</string>
+
+    <!-- UI States -->
+    <string name="out_of_season">Fuera de temporada de polen</string>
+
+    <!-- Errors -->
+    <string name="error_connection_title">Error de conexión</string>
+    <string name="error_server_title">Error del servidor</string>
+    <string name="error_unknown_title">Error desconocido</string>
+
+    <!-- Pollen Levels -->
+    <string name="pollen_level_none">Nulo</string>
+    <string name="pollen_level_low">Bajo</string>
+    <string name="pollen_level_medium">Medio</string>
+    <string name="pollen_level_high">Alto</string>
+
+    <!-- Pollen Types -->
+    <string name="pollen_type_alder">Aliso</string>
+    <string name="pollen_type_birch">Abedul</string>
+    <string name="pollen_type_grass">Gramíneas</string>
+    <string name="pollen_type_mugwort">Artemisia</string>
+    <string name="pollen_type_olive">Olivo</string>
+    <string name="pollen_type_ragweed">Ambrosía</string>
 </resources>
