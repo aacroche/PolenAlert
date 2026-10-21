@@ -3,6 +3,7 @@ package com.aacroche.polenalert.ui.today
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aacroche.polenalert.domain.model.DataResult
+import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.usecase.GetDailyPollenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -31,10 +32,16 @@ class TodayViewModel @Inject constructor(
             _uiState.value = when (val result = getDailyPollen(MADRID_LAT, MADRID_LON)) {
                 is DataResult.Success -> {
                     val today = result.data.firstOrNull()
-                    if (today == null || today.readings.isEmpty()) {
+                    val visibleReadings = today?.readings.orEmpty().filter {
+                        it.level != PollenLevel.NONE
+                    }
+                    if (today == null || visibleReadings.isEmpty()) {
                         TodayUiState.OutOfSeason
                     } else {
-                        TodayUiState.Success(today = today, nextDays = result.data.drop(1))
+                        TodayUiState.Success(
+                            today = today.copy(readings = visibleReadings),
+                            nextDays = result.data.drop(1)
+                        )
                     }
                 }
 

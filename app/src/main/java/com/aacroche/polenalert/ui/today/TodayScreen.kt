@@ -1,5 +1,6 @@
 package com.aacroche.polenalert.ui.today
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,10 +28,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -39,7 +44,10 @@ import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
+import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
+import com.aacroche.polenalert.ui.theme.getImg
+import com.aacroche.polenalert.ui.theme.labelRes
 
 @Composable
 fun TodayRoute(viewModel: TodayViewModel = hiltViewModel()) {
@@ -96,12 +104,42 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
 }
 
 @Composable
+fun PollenLevelChip(level: PollenLevel, modifier: Modifier = Modifier) {
+    val (content, container) = level.colors()
+    Row(
+        modifier = modifier
+            .background(container, CircleShape)
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.size(7.dp).background(content, CircleShape))
+        Text(
+            text = stringResource(level.labelRes()),
+            style = MaterialTheme.typography.labelMedium,
+            color = content
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PollenLevelChipPreview() {
+    PolenAlertTheme {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PollenLevel.entries.forEach { PollenLevelChip(it) }
+        }
+    }
+}
+
+@Composable
 fun PollenCard(todayPollen: PollenReading) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
             .padding(horizontal = 16.dp, vertical = 6.dp)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Row(
             modifier = Modifier
@@ -110,10 +148,15 @@ fun PollenCard(todayPollen: PollenReading) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Image(
+                painter = painterResource(todayPollen.type.getImg()),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(54.dp).clip(RoundedCornerShape(10.dp))
+            )
             Column(
                 verticalArrangement = Arrangement.Center
             ) {
-                // Título más destacado
                 Text(
                     text = todayPollen.type.displayName(),
                     style = MaterialTheme.typography.titleMedium,
@@ -122,43 +165,18 @@ fun PollenCard(todayPollen: PollenReading) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${todayPollen.dailyMean} granos/m³",
+                    text = "%.2f granos/m³".format(todayPollen.dailyMean),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            // Nivel de polen alineado horizontalmente a la derecha
-            OvalTagWithIcon(todayPollen.level)
+
+            PollenLevelChip(todayPollen.level)
         }
     }
 }
 
-@Composable
-fun OvalTagWithIcon(pollenlevel: PollenLevel) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .background(color = pollenlevel.colors().second, shape = CircleShape)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier.size(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painterResource(R.drawable.ic_circle),
-                contentDescription = null,
-                tint = pollenlevel.colors().first
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = pollenlevel.displayName(),
-            color = pollenlevel.colors().first,
-            fontSize = 14.sp
-        )
-    }
-}
+
 
 @Composable
 fun PollenType.displayName(): String = when (this) {
