@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">PolenAlert</string>
+
+    <!-- General / Actions -->
+    <string name="retry">Retry</string>
+
+    <!-- UI States -->
+    <string name="out_of_season">Out of pollen season</string>
+
+    <!-- Errors -->
+    <string name="error_connection_title">Connection Error</string>
+    <string name="error_server_title">Server Error</string>
+    <string name="error_unknown_title">Unknown Error</string>
+
+    <!-- Pollen Levels -->
+    <string name="pollen_level_none">None</string>
+    <string name="pollen_level_low">Low</string>
+    <string name="pollen_level_medium">Medium</string>
+    <string name="pollen_level_high">High</string>
+
+    <!-- Pollen Types -->
+    <string name="pollen_type_alder">Alder</string>
+    <string name="pollen_type_birch">Birch</string>
+    <string name="pollen_type_grass">Grass</string>
+    <string name="pollen_type_mugwort">Mugwort</string>
+    <string name="pollen_type_olive">Olive</string>
+    <string name="pollen_type_ragweed">Ragweed</string>
+</resources>
