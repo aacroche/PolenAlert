@@ -31,4 +31,16 @@
     <string name="pollen_type_mugwort">Mugwort</string>
     <string name="pollen_type_olive">Olive</string>
     <string name="pollen_type_ragweed">Ragweed</string>
+
+    <!-- Greetings -->
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_night">Good evening</string>
+
+    <!-- Header -->
+    <string name="madrid_location">Madrid · Center</string>
+    <string name="date_pattern" translatable="false">EEEE, MMMM d</string>
+    <string name="today_date">TODAY · %1$s</string>
+    <string name="section_title">Your pollens</string>
+    <string name="updated_at">Updated %1$s</string>
 </resources>

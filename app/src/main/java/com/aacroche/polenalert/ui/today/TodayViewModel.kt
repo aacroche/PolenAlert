@@ -11,10 +11,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 
 @HiltViewModel
 class TodayViewModel @Inject constructor(
-    private val getDailyPollen: GetDailyPollenUseCase
+    private val getDailyPollen: GetDailyPollenUseCase,
+    private val clock: Clock
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<TodayUiState>(TodayUiState.Loading)
@@ -38,9 +43,14 @@ class TodayViewModel @Inject constructor(
                     if (today == null || visibleReadings.isEmpty()) {
                         TodayUiState.OutOfSeason
                     } else {
+                        val now = LocalDateTime.now(clock)
+                        val format = DateTimeFormatter.ofPattern("HH:mm")
                         TodayUiState.Success(
                             today = today.copy(readings = visibleReadings),
-                            nextDays = result.data.drop(1)
+                            nextDays = result.data.drop(1),
+                            date = now.toLocalDate(),
+                            greeting = greetingFor(now.hour),
+                            updatedAt = now.format(format)
                         )
                     }
                 }
