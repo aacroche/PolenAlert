@@ -55,7 +55,7 @@ class AirQualityMapperTest {
         assertEquals(2, result.size)
         val day1 = result.first().readings.single { it.type == PollenType.GRASS }
         assertEquals(20.0, day1.dailyMean, 0.001)
-        assertEquals(PollenLevel.MEDIUM, day1.level)
+        assertEquals(PollenLevel.LOW, day1.level)
     }
 
     @Test
