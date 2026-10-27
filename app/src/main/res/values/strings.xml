@@ -31,4 +31,17 @@
     <string name="pollen_type_mugwort">Artemisia</string>
     <string name="pollen_type_olive">Olivo</string>
     <string name="pollen_type_ragweed">Ambrosía</string>
+
+    <!-- Greetings -->
+    <string name="greeting_morning">Buenos días</string>
+    <string name="greeting_afternoon">Buenas tardes</string>
+    <string name="greeting_night">Buenas noches</string>
+
+    <!-- Header -->
+    <string name="pollen_alert_title">Polen Alert</string>
+    <string name="madrid_location">Madrid · Centro</string>
+    <string name="date_pattern" translatable="false">EEEE, d \'de\' MMMM</string>
+    <string name="today_prefix">HOY</string>
+    <string name="section_title">Tus pólenes</string>
+    <string name="updated_at">Actualizado %1$s</string>
 </resources>
