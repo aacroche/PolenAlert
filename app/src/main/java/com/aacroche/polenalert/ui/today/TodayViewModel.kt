@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 @HiltViewModel
 class TodayViewModel @Inject constructor(
     private val getDailyPollen: GetDailyPollenUseCase,
-    private val clock: Clock = Clock.systemDefaultZone()
+    private val clock: Clock
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<TodayUiState>(TodayUiState.Loading)

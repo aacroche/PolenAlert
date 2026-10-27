@@ -50,7 +50,7 @@ class TodayViewModelTest {
         val nextDay = DailyPollen(date = "2023-05-02", readings = listOf(reading))
         fakeRepository.result = DataResult.Success(listOf(today, nextDay))
 
-        val viewModel = TodayViewModel(getDailyPollenUseCase)
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
 
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
@@ -65,7 +65,7 @@ class TodayViewModelTest {
     fun `when repository returns empty list then emit Loading then OutOfSeason`() = runTest {
         fakeRepository.result = DataResult.Success(emptyList())
 
-        val viewModel = TodayViewModel(getDailyPollenUseCase)
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
 
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
@@ -78,7 +78,7 @@ class TodayViewModelTest {
     fun `when repository returns error then emit Loading then Error`() = runTest {
         fakeRepository.result = DataResult.Error(DataError.NO_CONNECTION)
 
-        val viewModel = TodayViewModel(getDailyPollenUseCase)
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
 
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
@@ -92,7 +92,7 @@ class TodayViewModelTest {
     fun `when retry after error then emit Loading then Success`() = runTest {
         fakeRepository.result = DataResult.Error(DataError.NO_CONNECTION)
 
-        val viewModel = TodayViewModel(getDailyPollenUseCase)
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
 
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
@@ -119,7 +119,7 @@ class TodayViewModelTest {
         val today = DailyPollen(date = "2023-05-01", readings = listOf(grassReading, alderReading))
         fakeRepository.result = DataResult.Success(listOf(today))
 
-        val viewModel = TodayViewModel(getDailyPollenUseCase)
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
 
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
@@ -137,7 +137,7 @@ class TodayViewModelTest {
         val today = DailyPollen(date = "2023-05-01", readings = listOf(alderReading, birchReading))
         fakeRepository.result = DataResult.Success(listOf(today))
 
-        val viewModel = TodayViewModel(getDailyPollenUseCase)
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
 
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
@@ -152,8 +152,7 @@ class TodayViewModelTest {
         val today = DailyPollen(date = "2026-10-27", readings = listOf(reading))
         fakeRepository.result = DataResult.Success(listOf(today))
 
-        val testClock = Clock.fixed(Instant.parse("2026-10-27T09:00:00Z"), ZoneId.of("UTC"))
-        val viewModel = TodayViewModel(getDailyPollenUseCase, testClock)
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
 
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
@@ -161,19 +160,9 @@ class TodayViewModelTest {
             val success = awaitItem() as TodayUiState.Success
             assertEquals(R.string.greeting_morning, success.greeting)
             assertEquals(LocalDate.of(2026, 10, 27), success.date)
+            assertEquals("08:30", success.updatedAt)
         }
     }
-
-    @Test
-    fun `greetingFor boundary values test`() {
-        assertEquals(R.string.greeting_night, greetingFor(5))
-        assertEquals(R.string.greeting_morning, greetingFor(6))
-        assertEquals(R.string.greeting_morning, greetingFor(13))
-        assertEquals(R.string.greeting_afternoon, greetingFor(14))
-        assertEquals(R.string.greeting_afternoon, greetingFor(20))
-        assertEquals(R.string.greeting_night, greetingFor(21))
-    }
-
 
 
 

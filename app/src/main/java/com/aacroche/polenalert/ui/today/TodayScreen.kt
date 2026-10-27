@@ -70,60 +70,62 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
             .safeDrawingPadding()
     ) {
         TodayHeader(stringResource(R.string.madrid_location))
-        when (state) {
-            is TodayUiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        horizontal = 20.dp,
-                        vertical = 12.dp
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    item { TodayGreeting(state.date, state.greeting) }
-                    item { SectionTitle(state.updatedAt) }
-                    items(
-                        items = state.today.readings,
-                        key = { it.type }
+        Box(Modifier.weight(1f)) {
+            when (state) {
+                is TodayUiState.Success -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            horizontal = 20.dp,
+                            vertical = 12.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        PollenCard(it)
+                        item { TodayGreeting(state.date, state.greeting) }
+                        item { SectionTitle(state.updatedAt) }
+                        items(
+                            items = state.today.readings,
+                            key = { it.type }
+                        ) {
+                            PollenCard(it)
+                        }
                     }
                 }
-            }
 
-            TodayUiState.Loading -> {
-                LoadingScreen()
-            }
+                TodayUiState.Loading -> {
+                    LoadingScreen()
+                }
 
-            TodayUiState.OutOfSeason -> {
-                MessageScreen(
-                    title = stringResource(R.string.out_of_season),
-                    body = "",
-                    actionText = null,
-                    onAction = {}
-                )
-            }
-
-            is TodayUiState.Error -> {
-                val (errorTitle, errorBody) = when (state.error) {
-                    DataError.NO_CONNECTION -> stringResource(R.string.error_connection_title) to stringResource(
-                        R.string.error_connection_message
-                    )
-
-                    DataError.SERVER -> stringResource(R.string.error_server_title) to stringResource(
-                        R.string.error_server_message
-                    )
-
-                    DataError.UNKNOWN -> stringResource(R.string.error_unknown_title) to stringResource(
-                        R.string.error_unknown_message
+                TodayUiState.OutOfSeason -> {
+                    MessageScreen(
+                        title = stringResource(R.string.out_of_season),
+                        body = "",
+                        actionText = null,
+                        onAction = {}
                     )
                 }
-                MessageScreen(
-                    title = errorTitle,
-                    body = errorBody,
-                    actionText = stringResource(R.string.retry),
-                    onAction = onRetry
-                )
+
+                is TodayUiState.Error -> {
+                    val (errorTitle, errorBody) = when (state.error) {
+                        DataError.NO_CONNECTION -> stringResource(R.string.error_connection_title) to stringResource(
+                            R.string.error_connection_message
+                        )
+
+                        DataError.SERVER -> stringResource(R.string.error_server_title) to stringResource(
+                            R.string.error_server_message
+                        )
+
+                        DataError.UNKNOWN -> stringResource(R.string.error_unknown_title) to stringResource(
+                            R.string.error_unknown_message
+                        )
+                    }
+                    MessageScreen(
+                        title = errorTitle,
+                        body = errorBody,
+                        actionText = stringResource(R.string.retry),
+                        onAction = onRetry
+                    )
+                }
             }
         }
     }
@@ -154,7 +156,7 @@ fun TodayGreeting(date: LocalDate, greeting: Int) {
     val dateText = date.format(DateTimeFormatter.ofPattern(pattern, locale)).uppercase(locale)
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-            text = stringResource(R.string.today_prefix) + " · " + dateText,  // "HOY · MARTES, 27 DE OCTUBRE"
+            text = stringResource(R.string.today_date, dateText),  // "HOY · MARTES, 27 DE OCTUBRE"
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary
         )
