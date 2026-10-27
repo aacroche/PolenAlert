@@ -109,6 +109,40 @@ class TodayViewModelTest {
         }
     }
 
+    @Test
+    fun `when repository returns mixed NONE readings then emit Success with filtered readings`() = runTest {
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val alderReading = PollenReading(type = PollenType.ALDER, dailyMean = 0.0, level = PollenLevel.NONE)
+        val today = DailyPollen(date = "2023-05-01", readings = listOf(grassReading, alderReading))
+        fakeRepository.result = DataResult.Success(listOf(today))
+
+        val viewModel = TodayViewModel(getDailyPollenUseCase)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val success = awaitItem() as TodayUiState.Success
+            assertEquals(1, success.today.readings.size)
+            assertEquals(grassReading, success.today.readings.first())
+        }
+    }
+
+    @Test
+    fun `when repository returns all NONE readings then emit OutOfSeason`() = runTest {
+        val alderReading = PollenReading(type = PollenType.ALDER, dailyMean = 0.0, level = PollenLevel.NONE)
+        val birchReading = PollenReading(type = PollenType.BIRCH, dailyMean = 0.0, level = PollenLevel.NONE)
+        val today = DailyPollen(date = "2023-05-01", readings = listOf(alderReading, birchReading))
+        fakeRepository.result = DataResult.Success(listOf(today))
+
+        val viewModel = TodayViewModel(getDailyPollenUseCase)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertEquals(TodayUiState.OutOfSeason, awaitItem())
+        }
+    }
+
 
     class FakePollenRepository : PollenRepository {
         var result: DataResult<List<DailyPollen>> = DataResult.Success(emptyList())

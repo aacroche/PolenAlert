@@ -34,7 +34,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,7 +43,6 @@ import com.aacroche.polenalert.R
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
-import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
 import com.aacroche.polenalert.ui.theme.getImg
@@ -172,7 +170,7 @@ fun PollenCard(todayPollen: PollenReading) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = todayPollen.type.nameRes(),
+                    text = stringResource(todayPollen.type.nameRes()),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -185,7 +183,7 @@ fun PollenCard(todayPollen: PollenReading) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.grains_per_m3, todayPollen.dailyMean),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -199,7 +197,7 @@ fun PollenCard(todayPollen: PollenReading) {
 fun MessageScreen(title: String, body: String, actionText: String?, onAction: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Alignment.CenterHorizontally.let { Arrangement.Center },
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(title, style = MaterialTheme.typography.titleLarge)
