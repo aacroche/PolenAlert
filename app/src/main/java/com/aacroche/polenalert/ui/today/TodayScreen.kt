@@ -156,7 +156,7 @@ fun TodayGreeting(date: LocalDate, greeting: Int) {
     val dateText = date.format(DateTimeFormatter.ofPattern(pattern, locale)).uppercase(locale)
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-            text = stringResource(R.string.today_date, dateText),  // "HOY · MARTES, 27 DE OCTUBRE"
+            text = stringResource(R.string.today_date, dateText),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary
         )

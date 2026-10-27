@@ -38,7 +38,7 @@
     <string name="greeting_night">Buenas noches</string>
 
     <!-- Header -->
-    <string name="pollen_alert_title" translatable="false">Pollen Alert</string>
+    <string name="pollen_alert_title" translatable="false">Polen Alert</string>
     <string name="madrid_location">Madrid · Centro</string>
     <string name="date_pattern" translatable="false">EEEE, d \'de\' MMMM</string>
     <string name="today_date">HOY · %1$s</string>

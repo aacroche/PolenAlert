@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
 import java.time.LocalDate
-import java.time.LocalTime
 
 sealed interface TodayUiState {
     data object Loading : TodayUiState
