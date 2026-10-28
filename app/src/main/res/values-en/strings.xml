@@ -48,6 +48,6 @@
     <string name="risk_low_today">RISK LOW TODAY</string>
     <string name="risk_medium_today">RISK MEDIUM TODAY</string>
     <string name="risk_title">Dominant pollen: %1$s</string>
-    <string name="risk_subtitle">%1$.1f granes/m³ on average</string>
+    <string name="risk_subtitle">%1$.1f grains/m³ on average</string>
     <string name="risk_high_today">RISK HIGH TODAY</string>
 </resources>

@@ -38,10 +38,12 @@ class TodayViewModel @Inject constructor(
             _uiState.value = when (val result = getDailyPollen(MADRID_LAT, MADRID_LON)) {
                 is DataResult.Success -> {
                     val today = result.data.firstOrNull()
-                    val dominant = today?.dominantReading()
                     val visibleReadings = today?.readings.orEmpty().filter {
                         it.level != PollenLevel.NONE
                     }
+                    val visibleToday = today?.copy(readings = visibleReadings)
+                    val dominant = visibleToday?.dominantReading()
+
                     if (today == null || visibleReadings.isEmpty() || dominant == null) {
                         TodayUiState.OutOfSeason
                     } else {
@@ -49,7 +51,7 @@ class TodayViewModel @Inject constructor(
                         val format = DateTimeFormatter.ofPattern("HH:mm")
 
                         TodayUiState.Success(
-                            today = today.copy(readings = visibleReadings),
+                            today = visibleToday,
                             nextDays = result.data.drop(1),
                             date = now.toLocalDate(),
                             greeting = greetingFor(now.hour),
