@@ -18,7 +18,7 @@ val Inter = FontFamily(
 
 val Typography = Typography(
     headlineMedium = TextStyle(fontFamily = Inter, fontSize = 28.sp),
-    titleLarge = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Bold, fontSize = 19.sp),
+    titleLarge = TextStyle(fontFamily = Inter, fontSize = 19.sp),
     titleMedium = TextStyle(fontFamily = Inter, fontSize = 17.sp),
     titleSmall = TextStyle(fontFamily = Inter, fontWeight = FontWeight.Bold, fontSize = 15.sp),
     labelLarge = TextStyle(fontFamily = Inter, fontWeight = FontWeight.SemiBold, fontSize = 13.sp),

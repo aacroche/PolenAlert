@@ -44,4 +44,11 @@
     <string name="today_date">HOY · %1$s</string>
     <string name="section_title">Tus pólenes</string>
     <string name="updated_at">Actualizado %1$s</string>
+
+    <!-- Risk card -->
+    <string name="risk_title">Polen predominante: %1$s</string>
+    <string name="risk_subtitle">%1$.1f granos/m³ de media</string>
+    <string name="risk_high_today">RIESGO ALTO HOY</string>
+    <string name="risk_low_today">RIESGO BAJO HOY</string>
+    <string name="risk_medium_today">RIESGO MEDIO HOY</string>
 </resources>

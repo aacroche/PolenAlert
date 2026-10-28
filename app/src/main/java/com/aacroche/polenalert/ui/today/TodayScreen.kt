@@ -3,6 +3,7 @@ package com.aacroche.polenalert.ui.today
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -45,8 +47,10 @@ import com.aacroche.polenalert.R
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
+import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
+import com.aacroche.polenalert.ui.theme.dominantRisk
 import com.aacroche.polenalert.ui.theme.getImg
 import com.aacroche.polenalert.ui.theme.labelRes
 import com.aacroche.polenalert.ui.theme.nameRes
@@ -82,6 +86,7 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         item { TodayGreeting(state.date, state.greeting) }
+                        item { RiskHeroCard(state.dominant)}
                         item { SectionTitle(state.updatedAt) }
                         items(
                             items = state.today.readings,
@@ -127,6 +132,77 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
+    val (levelContent, _) = dominant.level.colors()
+    val onCard = MaterialTheme.colorScheme.onPrimary
+
+    Card(
+        modifier = modifier.fillMaxWidth(),            // modifier solo en la raíz
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(Modifier.size(8.dp).background(levelContent, CircleShape))
+                    Text(
+                        text = stringResource(dominant.level.dominantRisk()),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = onCard
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.risk_title, stringResource(dominant.type.nameRes())),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = onCard
+                )
+                Text(
+                    text = stringResource(R.string.risk_subtitle, dominant.dailyMean),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(66.dp)
+                    .background(Color.White.copy(alpha = 0.08f), CircleShape)
+                    .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(dominant.level.labelRes()),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = onCard
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, locale = "es")
+@Composable
+private fun RiskHeroCardPreview() {
+    PolenAlertTheme {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            RiskHeroCard(PollenReading(PollenType.MUGWORT, PollenLevel.LOW,6.9))
+            RiskHeroCard(PollenReading(PollenType.GRASS, PollenLevel.MEDIUM,34.0))
+            RiskHeroCard(PollenReading(PollenType.OLIVE, PollenLevel.HIGH,210.0))
         }
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.model.PollenLevel
+import com.aacroche.polenalert.domain.model.dominantReading
 import com.aacroche.polenalert.domain.usecase.GetDailyPollenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -37,20 +38,23 @@ class TodayViewModel @Inject constructor(
             _uiState.value = when (val result = getDailyPollen(MADRID_LAT, MADRID_LON)) {
                 is DataResult.Success -> {
                     val today = result.data.firstOrNull()
+                    val dominant = today?.dominantReading()
                     val visibleReadings = today?.readings.orEmpty().filter {
                         it.level != PollenLevel.NONE
                     }
-                    if (today == null || visibleReadings.isEmpty()) {
+                    if (today == null || visibleReadings.isEmpty() || dominant == null) {
                         TodayUiState.OutOfSeason
                     } else {
                         val now = LocalDateTime.now(clock)
                         val format = DateTimeFormatter.ofPattern("HH:mm")
+
                         TodayUiState.Success(
                             today = today.copy(readings = visibleReadings),
                             nextDays = result.data.drop(1),
                             date = now.toLocalDate(),
                             greeting = greetingFor(now.hour),
-                            updatedAt = now.format(format)
+                            updatedAt = now.format(format),
+                            dominant = dominant
                         )
                     }
                 }

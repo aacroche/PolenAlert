@@ -52,3 +52,11 @@ fun PollenType.getImg() : Int = when(this) {
     PollenType.MUGWORT -> R.drawable.img_mugwort
     PollenType.RAGWEED -> R.drawable.img_ragweed
 }
+
+@StringRes
+fun PollenLevel.dominantRisk(): Int = when (this) {
+    PollenLevel.LOW -> R.string.risk_low_today
+    PollenLevel.MEDIUM -> R.string.risk_medium_today
+    PollenLevel.HIGH -> R.string.risk_high_today
+    PollenLevel.NONE -> R.string.pollen_level_none
+}

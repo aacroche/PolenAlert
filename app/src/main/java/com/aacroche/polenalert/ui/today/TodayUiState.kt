@@ -3,6 +3,7 @@ package com.aacroche.polenalert.ui.today
 import androidx.annotation.StringRes
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
+import com.aacroche.polenalert.domain.model.PollenReading
 import java.time.LocalDate
 
 sealed interface TodayUiState {
@@ -12,7 +13,8 @@ sealed interface TodayUiState {
         val nextDays: List<DailyPollen>,
         val date: LocalDate,
         @StringRes val greeting: Int,
-        val updatedAt: String
+        val updatedAt: String,
+        val dominant: PollenReading
     ) : TodayUiState
 
     data object OutOfSeason : TodayUiState
