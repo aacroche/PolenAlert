@@ -1,6 +1,7 @@
 package com.aacroche.polenalert.ui.today
 
 import app.cash.turbine.test
+import com.aacroche.polenalert.R
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
@@ -21,8 +22,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import com.aacroche.polenalert.R
-
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModelTest {
@@ -131,7 +130,7 @@ class TodayViewModelTest {
     }
 
     @Test
-    fun `when repository returns all NONE readings then emit OutOfSeason`() = runTest {
+    fun `when all readings are NONE then emit OutOfSeason`() = runTest {
         val alderReading = PollenReading(type = PollenType.ALDER, dailyMean = 0.0, level = PollenLevel.NONE)
         val birchReading = PollenReading(type = PollenType.BIRCH, dailyMean = 0.0, level = PollenLevel.NONE)
         val today = DailyPollen(date = "2023-05-01", readings = listOf(alderReading, birchReading))
@@ -143,6 +142,40 @@ class TodayViewModelTest {
             assertEquals(TodayUiState.Loading, awaitItem())
             advanceUntilIdle()
             assertEquals(TodayUiState.OutOfSeason, awaitItem())
+        }
+    }
+
+    @Test
+    fun `when there is more than one pollen reading then emit Success with dominant reading`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 40.0, level = PollenLevel.LOW)
+        val today = DailyPollen(date = "2023-05-01", readings = listOf(oliveReading, grassReading))
+        fakeRepository.result = DataResult.Success(listOf(today))
+
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val success = awaitItem() as TodayUiState.Success
+            assertEquals(PollenType.OLIVE, success.dominant.type)
+        }
+    }
+
+    @Test
+    fun `when there is more than one pollen with same level reading then emit Success with bigger dailyMean`() = runTest {
+        val mugwortReading = PollenReading(type = PollenType.MUGWORT, dailyMean = 5.0, level = PollenLevel.LOW)
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 20.0, level = PollenLevel.LOW)
+        val today = DailyPollen(date = "2023-05-01", readings = listOf(mugwortReading, grassReading))
+        fakeRepository.result = DataResult.Success(listOf(today))
+
+        val viewModel = TodayViewModel(getDailyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val success = awaitItem() as TodayUiState.Success
+            assertEquals(PollenType.GRASS, success.dominant.type)
         }
     }
 
@@ -163,8 +196,6 @@ class TodayViewModelTest {
             assertEquals("08:30", success.updatedAt)
         }
     }
-
-
 
     class FakePollenRepository : PollenRepository {
         var result: DataResult<List<DailyPollen>> = DataResult.Success(emptyList())
