@@ -59,7 +59,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun TodayRoute(viewModel: TodayViewModel = hiltViewModel()) {
+fun TodayDestination(viewModel: TodayViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     TodayScreen(state = state, onRetry = viewModel::retry)
 }
@@ -71,7 +71,6 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .safeDrawingPadding()
     ) {
         TodayHeader(stringResource(R.string.madrid_location))
         Box(Modifier.weight(1f)) {

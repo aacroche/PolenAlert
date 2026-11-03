@@ -15,6 +15,7 @@ retrofit = "3.0.0"
 okhttp = "5.1.0"
 kotlinxSerialization = "1.11.0"
 coroutines = "1.11.0"
+navigation3 = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,10 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 turbine = { group = "app.cash.turbine", name = "turbine", version = "1.2.1" }
 androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
+androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
+
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
