@@ -54,4 +54,13 @@
     <string name="tab_today">HOY</string>
     <string name="tab_forecast">PREVISIÓN</string>
     <string name="tab_profile">PERFIL</string>
+
+    <!-- Forecast -->
+    <string name="forecast_title">Previsión</string>
+    <string name="forecast_subtitle">Tus próximos 4 días</string>
+    <string name="forecast_levels_header">Nivel diario previsto</string>
+    <string name="trend_rising">↗ Subiendo</string>
+    <string name="trend_stable">→ Estable</string>
+    <string name="trend_falling">↘ Bajando</string>
+    <string name="legend_levels">Niveles</string>
 </resources>

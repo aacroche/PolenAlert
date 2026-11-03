@@ -60,3 +60,10 @@ fun PollenLevel.dominantRisk(): Int = when (this) {
     PollenLevel.HIGH -> R.string.risk_high_today
     PollenLevel.NONE -> R.string.pollen_level_none
 }
+
+@StringRes
+fun com.aacroche.polenalert.domain.model.Trend.labelRes(): Int = when (this) {
+    com.aacroche.polenalert.domain.model.Trend.RISING -> R.string.trend_rising
+    com.aacroche.polenalert.domain.model.Trend.STABLE -> R.string.trend_stable
+    com.aacroche.polenalert.domain.model.Trend.FALLING -> R.string.trend_falling
+}

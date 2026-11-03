@@ -23,6 +23,7 @@ import com.aacroche.polenalert.ui.navigation.TodayRoute
 import com.aacroche.polenalert.ui.navigation.TopLevelDestination
 import com.aacroche.polenalert.ui.today.TodayDestination
 import com.aacroche.polenalert.R
+import com.aacroche.polenalert.ui.forecast.ForecastDestination
 
 @Composable
 fun PolenAlertAppContent() {
@@ -72,7 +73,7 @@ fun PolenAlertAppContent() {
             ),
             entryProvider = entryProvider {
                 entry<TodayRoute> { TodayDestination() }
-                entry<ForecastRoute> { Text(stringResource(R.string.tab_forecast)) }   // placeholder
+                entry<ForecastRoute> { ForecastDestination() }   // placeholder
                 entry<ProfileRoute> { Text(stringResource(R.string.tab_profile)) }        // placeholder
             }
         )
