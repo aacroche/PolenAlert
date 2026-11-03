@@ -50,9 +50,9 @@
     <string name="risk_title">Dominant pollen: %1$s</string>
     <string name="risk_subtitle">%1$.1f grains/m³ on average</string>
     <string name="risk_high_today">RISK HIGH TODAY</string>
-    <string name="tab_today">HOY</string>
-    <string name="tab_forecast">PREVISIÓN</string>
-    <string name="tab_profile">PERFIL</string>
+    <string name="tab_today">Today</string>
+    <string name="tab_forecast">Forecast</string>
+    <string name="tab_profile">Profile</string>
 
     <!-- Forecast -->
     <string name="forecast_title">Forecast</string>

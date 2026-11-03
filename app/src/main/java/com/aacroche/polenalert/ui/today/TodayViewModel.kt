@@ -40,7 +40,7 @@ class TodayViewModel @Inject constructor(
                     val today = result.data.firstOrNull()
                     val visibleReadings = today?.readings.orEmpty().filter {
                         it.level != PollenLevel.NONE
-                    }.distinctBy { it.type }
+                    }
                     val visibleToday = today?.copy(readings = visibleReadings)
                     val dominant = visibleToday?.dominantReading()
 

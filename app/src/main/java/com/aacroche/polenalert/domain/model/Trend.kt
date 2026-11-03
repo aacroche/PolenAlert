@@ -5,10 +5,10 @@ import com.aacroche.polenalert.domain.model.Trend.RISING
 import com.aacroche.polenalert.domain.model.Trend.STABLE
 
 enum class Trend {
-    RISING, STABLE, FALLING;
+    RISING, STABLE, FALLING
 }
 
-fun List<PollenLevel>.toTrend() : Trend = when {
+fun List<PollenLevel>.toTrend(): Trend = when {
     this.isEmpty() -> STABLE
     this.first() < this.last() -> RISING
     this.first() > this.last() -> FALLING
@@ -17,7 +17,7 @@ fun List<PollenLevel>.toTrend() : Trend = when {
 
 data class PollenForecast(
     val type: PollenType,
-    val levels: List<PollenLevel>,   // uno por día, en orden
+    val levels: List<PollenLevel>,
     val trend: Trend,
 )
 

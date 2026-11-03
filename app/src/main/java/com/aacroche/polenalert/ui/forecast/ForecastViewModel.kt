@@ -36,8 +36,8 @@ class ForecastViewModel @Inject constructor(
                         ForecastUiState.Empty
                     } else {
                         val dailyData = result.data.take(REQUIRED_DAYS)
-                        val days = dailyData.mapNotNull { dailyPollen ->
-                            runCatching { LocalDate.parse(dailyPollen.date) }.getOrNull()
+                        val days = dailyData.map { dailyPollen ->
+                            LocalDate.parse(dailyPollen.date)
                         }
                         val forecasts = dailyData.toForecasts()
                         if (forecasts.isEmpty()) {

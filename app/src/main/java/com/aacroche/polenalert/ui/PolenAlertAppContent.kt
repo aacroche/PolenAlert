@@ -73,8 +73,8 @@ fun PolenAlertAppContent() {
             ),
             entryProvider = entryProvider {
                 entry<TodayRoute> { TodayDestination() }
-                entry<ForecastRoute> { ForecastDestination() }   // placeholder
-                entry<ProfileRoute> { Text(stringResource(R.string.tab_profile)) }        // placeholder
+                entry<ForecastRoute> { ForecastDestination() }
+                entry<ProfileRoute> { Text(stringResource(R.string.tab_profile)) }
             }
         )
     }
