@@ -228,6 +228,8 @@ class TodayViewModelTest {
             advanceUntilIdle()
             val noAllergies = awaitItem() as TodayUiState.NoAllergies
             assertEquals("", noAllergies.name)
+            assertEquals(LocalDate.of(2026, 10, 27), noAllergies.date)
+            assertEquals(R.string.greeting_morning, noAllergies.greeting)
         }
     }
 

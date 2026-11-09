@@ -73,9 +73,10 @@ class TodayViewModel @Inject constructor(
         }
 
         is MyPollenResult.NoAllergiesSelected -> {
+            val now = LocalDateTime.now(clock)
             TodayUiState.NoAllergies(
-                date = LocalDateTime.now(clock).toLocalDate(),
-                greeting = greetingFor(LocalDateTime.now(clock).hour),
+                date = now.toLocalDate(),
+                greeting = greetingFor(now.hour),
                 name = this.name
             )
         }
