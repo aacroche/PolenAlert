@@ -17,13 +17,13 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.aacroche.polenalert.ui.forecast.ForecastDestination
 import com.aacroche.polenalert.ui.navigation.ForecastRoute
 import com.aacroche.polenalert.ui.navigation.ProfileRoute
 import com.aacroche.polenalert.ui.navigation.TodayRoute
 import com.aacroche.polenalert.ui.navigation.TopLevelDestination
+import com.aacroche.polenalert.ui.profile.ProfileDestination
 import com.aacroche.polenalert.ui.today.TodayDestination
-import com.aacroche.polenalert.R
-import com.aacroche.polenalert.ui.forecast.ForecastDestination
 
 @Composable
 fun PolenAlertAppContent() {
@@ -74,7 +74,7 @@ fun PolenAlertAppContent() {
             entryProvider = entryProvider {
                 entry<TodayRoute> { TodayDestination() }
                 entry<ForecastRoute> { ForecastDestination() }
-                entry<ProfileRoute> { Text(stringResource(R.string.tab_profile)) }
+                entry<ProfileRoute> { ProfileDestination() }
             }
         )
     }
