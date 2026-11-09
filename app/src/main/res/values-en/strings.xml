@@ -68,4 +68,8 @@
     <string name="profile_name_label">Your name</string>
     <string name="profile_allergies_title">Your allergies</string>
     <string name="profile_allergies_subtitle">Choose which pollens affect you</string>
+    <string name="greeting_with_name" translatable="false">%1$s, %2$s</string>
+    <string name="choose_allergies_title">Choose your allergies</string>
+    <string name="choose_allergies_subtitle">This way we will only show you the pollens that affect you</string>
+    <string name="go_to_profile">Go to Profile</string>
 </resources>

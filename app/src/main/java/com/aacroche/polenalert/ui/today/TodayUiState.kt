@@ -14,9 +14,11 @@ sealed interface TodayUiState {
         val date: LocalDate,
         @StringRes val greeting: Int,
         val updatedAt: String,
-        val dominant: PollenReading
+        val dominant: PollenReading,
+        val name: String
     ) : TodayUiState
 
     data object OutOfSeason : TodayUiState
     data class Error(val error: DataError) : TodayUiState
+    data class NoAllergies(val date: LocalDate, @StringRes val greeting: Int, val name: String) : TodayUiState
 }
