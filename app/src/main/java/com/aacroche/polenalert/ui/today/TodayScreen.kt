@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -59,13 +58,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun TodayDestination(viewModel: TodayViewModel = hiltViewModel()) {
+fun TodayDestination(viewModel: TodayViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    TodayScreen(state = state, onRetry = viewModel::retry)
+    TodayScreen(state = state, onRetry = viewModel::retry, onOpenProfile = onOpenProfile)
 }
 
 @Composable
-fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
+fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> Unit) {
 
     Column(
         Modifier
@@ -84,7 +83,7 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        item { TodayGreeting(state.date, state.greeting) }
+                        item { TodayGreeting(state.date, state.greeting, state.name) }
                         item { RiskHeroCard(state.dominant)}
                         item { SectionTitle(state.updatedAt) }
                         items(
@@ -130,6 +129,50 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit) {
                         onAction = onRetry
                     )
                 }
+
+                is TodayUiState.NoAllergies -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            horizontal = 20.dp,
+                            vertical = 12.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        item { TodayGreeting(state.date, state.greeting, state.name) }
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.choose_allergies_title),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.choose_allergies_subtitle),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(onClick = onOpenProfile) {
+                                        Text(stringResource(R.string.go_to_profile))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -141,7 +184,7 @@ fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
     val onCard = MaterialTheme.colorScheme.onPrimary
 
     Card(
-        modifier = modifier.fillMaxWidth(),            // modifier solo en la raíz
+        modifier = modifier.fillMaxWidth(),           
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
@@ -225,10 +268,15 @@ fun SectionTitle(updatedAt: String) {
 }
 
 @Composable
-fun TodayGreeting(date: LocalDate, greeting: Int) {
+fun TodayGreeting(date: LocalDate, @androidx.annotation.StringRes greeting: Int, name: String) {
     val pattern = stringResource(R.string.date_pattern)
     val locale = LocalConfiguration.current.locales[0]
     val dateText = date.format(DateTimeFormatter.ofPattern(pattern, locale)).uppercase(locale)
+
+    val greetingText = stringResource(greeting)
+    val text = if (name.isBlank()) greetingText
+               else stringResource(R.string.greeting_with_name, greetingText, name)
+
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
             text = stringResource(R.string.today_date, dateText),
@@ -236,7 +284,7 @@ fun TodayGreeting(date: LocalDate, greeting: Int) {
             color = MaterialTheme.colorScheme.secondary
         )
         Text(
-            text = stringResource(greeting),
+            text = text,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
         )

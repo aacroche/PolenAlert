@@ -67,4 +67,8 @@
     <string name="profile_name_label">Tu nombre</string>
     <string name="profile_allergies_title">Tus alergias</string>
     <string name="profile_allergies_subtitle">Elige qué pólenes te afectan</string>
+    <string name="greeting_with_name" translatable="false">%1$s, %2$s</string>
+    <string name="choose_allergies_title">Elige tus alergias</string>
+    <string name="choose_allergies_subtitle">Así te mostraremos solo los pólenes que te afectan</string>
+    <string name="go_to_profile">Ir a Perfil</string>
 </resources>

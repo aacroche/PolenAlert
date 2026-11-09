@@ -72,7 +72,10 @@ fun PolenAlertAppContent() {
                 rememberViewModelStoreNavEntryDecorator()
             ),
             entryProvider = entryProvider {
-                entry<TodayRoute> { TodayDestination() }
+                entry<TodayRoute> { TodayDestination(onOpenProfile = {
+                    backStack.retainAll { it == TodayRoute }
+                    backStack.add(ProfileRoute)
+                })}
                 entry<ForecastRoute> { ForecastDestination() }
                 entry<ProfileRoute> { ProfileDestination() }
             }

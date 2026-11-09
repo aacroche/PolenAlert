@@ -108,6 +108,7 @@ fun ProfileScreen(
 @Composable
 private fun NameField(name: String, onNameSaved: (String) -> Unit) {
     var text by rememberSaveable(name) { mutableStateOf(name) }
+    var wasFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = text,
@@ -116,7 +117,11 @@ private fun NameField(name: String, onNameSaved: (String) -> Unit) {
         singleLine = true,
         modifier = Modifier
             .fillMaxWidth()
-            .onFocusChanged { if (!it.isFocused) onNameSaved(name) },
+            .onFocusChanged {  focusState ->
+                if (wasFocused && !focusState.isFocused && text != name) {
+                    onNameSaved(text)
+                }
+                wasFocused = focusState.isFocused },
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
