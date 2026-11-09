@@ -24,7 +24,11 @@ class ProfileViewModel @Inject constructor(
             initialValue = UserPreferences()
         )
 
-    fun onNameSaved(name: String) = viewModelScope.launch { repository.setName(name) }
-    fun onAllergyToggled(type: PollenType, enabled: Boolean) =
+    fun onNameSaved(name: String) {
+        viewModelScope.launch { repository.setName(name) }
+    }
+
+    fun onAllergyToggled(type: PollenType, enabled: Boolean) {
         viewModelScope.launch { repository.setAllergy(type, enabled) }
+    }
 }

@@ -24,11 +24,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,7 +47,9 @@ import com.aacroche.polenalert.R
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
 import com.aacroche.polenalert.ui.theme.Inter
+import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.getImg
+import androidx.compose.ui.tooling.preview.Preview
 import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
 
@@ -76,7 +80,7 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        item {NameField(state.name, onNameSaved) }
+        item { NameField(state.name, onNameSaved) }
         item {
             Column {
                 Text(
@@ -102,38 +106,34 @@ fun ProfileScreen(
 }
 
 @Composable
-fun NameField(name: String, onNameSaved: (String) -> Unit) {
-    var text by remember(name) { mutableStateOf(name) }
+private fun NameField(name: String, onNameSaved: (String) -> Unit) {
+    var text by rememberSaveable(name) { mutableStateOf(name) }
     val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it },
+        label = { Text(stringResource(R.string.profile_name_label)) },
+        singleLine = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .onFocusChanged { if (!it.isFocused) onNameSaved(name) },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = {
+            onNameSaved(text)
+            focusManager.clearFocus()
+        })
+    )
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text(stringResource(R.string.profile_name_label)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-            ),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = {
-                onNameSaved(text)
-                focusManager.clearFocus()
-            })
-        )
-    }
 }
 
 @Composable
-fun AllergyRow(type: PollenType, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+private fun AllergyRow(type: PollenType, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,26 +157,33 @@ fun AllergyRow(type: PollenType, checked: Boolean, onCheckedChange: (Boolean) ->
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(type.nameRes()),
-                style = TextStyle(
-                    fontFamily = Inter,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                ),
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = type.scientificName(),
-                style = TextStyle(
-                    fontFamily = Inter,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = 10.sp
-                ),
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         Switch(
             checked = checked,
             onCheckedChange = null
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ProfileScreenPreview() {
+    PolenAlertTheme {
+        ProfileScreen(
+            state = UserPreferences(
+                name = "María",
+                allergies = setOf(PollenType.GRASS, PollenType.OLIVE)
+            ),
+            onNameSaved = {},
+            onAllergyToggled = { _, _ -> }
         )
     }
 }
