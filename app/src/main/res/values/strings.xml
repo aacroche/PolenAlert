@@ -63,4 +63,8 @@
     <string name="trend_stable">→ Estable</string>
     <string name="trend_falling">↘ Bajando</string>
     <string name="legend_levels">Niveles</string>
+    <string name="profile_title">Perfil</string>
+    <string name="profile_name_label">Tu nombre</string>
+    <string name="profile_allergies_title">Tus alergias</string>
+    <string name="profile_allergies_subtitle">Elige qué pólenes te afectan</string>
 </resources>

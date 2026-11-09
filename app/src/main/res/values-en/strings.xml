@@ -62,4 +62,10 @@
     <string name="trend_stable">→ Stable</string>
     <string name="trend_falling">↘ Falling</string>
     <string name="legend_levels">Levels</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_name_label">Your name</string>
+    <string name="profile_allergies_title">Your allergies</string>
+    <string name="profile_allergies_subtitle">Choose which pollens affect you</string>
 </resources>
