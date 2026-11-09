@@ -8,4 +8,5 @@ Kotlin 2.4 · Jetpack Compose · MVVM + Clean Architecture · Hilt (KSP) · Retr
 [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) (6 tipos de polen, 4 días de previsión, Europa).
 
 ## Estado
-🚧 En desarrollo, fase 1: proyecto base y capa de red.
+Fase 1: completada.
+Fase 2: en desarrollo.
