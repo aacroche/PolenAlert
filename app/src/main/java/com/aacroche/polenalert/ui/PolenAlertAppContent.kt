@@ -29,7 +29,10 @@ import com.aacroche.polenalert.ui.today.TodayDestination
 fun PolenAlertAppContent() {
     val backStack = rememberNavBackStack(TodayRoute)
     val current = backStack.lastOrNull()
-
+    val openProfile: () -> Unit = {
+        backStack.retainAll { it == TodayRoute }
+        backStack.add(ProfileRoute)
+    }
     Scaffold(
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
@@ -72,14 +75,13 @@ fun PolenAlertAppContent() {
                 rememberViewModelStoreNavEntryDecorator()
             ),
             entryProvider = entryProvider {
-                entry<TodayRoute> { TodayDestination(onOpenProfile = {
-                    backStack.retainAll { it == TodayRoute }
-                    backStack.add(ProfileRoute)
-                })}
-                entry<ForecastRoute> { ForecastDestination() }
+                entry<TodayRoute> { TodayDestination(onOpenProfile = openProfile)}
+                entry<ForecastRoute> { ForecastDestination(onOpenProfile =  openProfile) }
                 entry<ProfileRoute> { ProfileDestination() }
             }
         )
     }
+
+
 }
 

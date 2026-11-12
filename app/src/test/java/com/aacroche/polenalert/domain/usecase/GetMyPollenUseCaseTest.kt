@@ -8,12 +8,10 @@ import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
-import com.aacroche.polenalert.domain.repository.PollenRepository
-import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
+import com.aacroche.polenalert.utils.FakePollenRepository
+import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -104,32 +102,78 @@ class GetMyPollenUseCaseTest {
         }
     }
 
-    class FakePollenRepository : PollenRepository {
-        var result: DataResult<List<DailyPollen>> = DataResult.Success(emptyList())
-        var calls = 0
+    @Test
+    fun `when multiple allergies selected then filter days to contain matching readings`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val mugwortReading = PollenReading(type = PollenType.MUGWORT, dailyMean = 5.0, level = PollenLevel.LOW)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading, grassReading, mugwortReading))
+        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePreferencesRepository.setPreferences(
+            UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE, PollenType.GRASS))
+        )
 
-        override suspend fun getDailyPollen(latitude: Double, longitude: Double): DataResult<List<DailyPollen>> {
-            calls++
-            return result
+        getMyPollenUseCase(40.42, -3.70).test {
+            val item = awaitItem() as MyPollenResult.Data
+            assertEquals("Test", item.name)
+            val filteredTypes = item.days.first().readings.map { it.type }
+            assertEquals(listOf(PollenType.OLIVE, PollenType.GRASS), filteredTypes)
         }
     }
 
-    class FakeUserPreferencesRepository : UserPreferencesRepository {
-        private val _preferences = MutableStateFlow(UserPreferences())
-        override val preferences: Flow<UserPreferences> = _preferences
+    @Test
+    fun `when selected allergy is not in readings then return empty readings for day`() = runTest {
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(grassReading))
+        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
 
-        fun setPreferences(prefs: UserPreferences) {
-            _preferences.value = prefs
+        getMyPollenUseCase(40.42, -3.70).test {
+            val item = awaitItem() as MyPollenResult.Data
+            assertEquals("Test", item.name)
+            assertEquals(0, item.days.first().readings.size)
         }
+    }
 
-        override suspend fun setName(name: String) {
-            _preferences.value = _preferences.value.copy(name = name)
+    @Test
+    fun `when user updates name then emit updated name in result`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading))
+        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Alice", allergies = setOf(PollenType.OLIVE)))
+
+        getMyPollenUseCase(40.42, -3.70).test {
+            val firstItem = awaitItem() as MyPollenResult.Data
+            assertEquals("Alice", firstItem.name)
+
+            fakePreferencesRepository.setName("Bob")
+
+            val secondItem = awaitItem() as MyPollenResult.Data
+            assertEquals("Bob", secondItem.name)
         }
+    }
 
-        override suspend fun setAllergy(type: PollenType, enabled: Boolean) {
-            val currentAllergies = _preferences.value.allergies.toMutableSet()
-            if (enabled) currentAllergies.add(type) else currentAllergies.remove(type)
-            _preferences.value = _preferences.value.copy(allergies = currentAllergies)
+    @Test
+    fun `when 4 days of pollen data returned then filter readings for all 4 days`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+
+        val dailyData = listOf(
+            DailyPollen(date = "2026-10-27", readings = listOf(oliveReading, grassReading)),
+            DailyPollen(date = "2026-10-28", readings = listOf(oliveReading, grassReading)),
+            DailyPollen(date = "2026-10-29", readings = listOf(oliveReading, grassReading)),
+            DailyPollen(date = "2026-10-30", readings = listOf(oliveReading, grassReading))
+        )
+        fakePollenRepository.result = DataResult.Success(dailyData)
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+
+        getMyPollenUseCase(40.42, -3.70).test {
+            val item = awaitItem() as MyPollenResult.Data
+            assertEquals(4, item.days.size)
+            item.days.forEach { day ->
+                assertEquals(1, day.readings.size)
+                assertEquals(PollenType.OLIVE, day.readings.first().type)
+            }
         }
     }
 }
