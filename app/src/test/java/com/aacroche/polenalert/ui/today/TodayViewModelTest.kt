@@ -8,16 +8,11 @@ import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
-import com.aacroche.polenalert.domain.model.UserPreferences
-import com.aacroche.polenalert.domain.repository.PollenRepository
-import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
 import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
 import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

@@ -115,6 +115,7 @@ class ForecastViewModelTest {
 
     @Test
     fun `when repository returns error then emit Loading then Error`() = runTest {
+        userPreferencesRepository.setAllergy(PollenType.GRASS, true)
         fakeRepository.result = DataResult.Error(DataError.NO_CONNECTION)
 
         val viewModel = ForecastViewModel(getMyPollen, clock)
@@ -168,7 +169,6 @@ class ForecastViewModelTest {
             DailyPollen(date = "2023-05-04", readings = listOf(reading))
         )
         fakeRepository.result = DataResult.Success(dailyData)
-        userPreferencesRepository = FakeUserPreferencesRepository()
 
         val viewModel = ForecastViewModel(getMyPollen, clock)
 

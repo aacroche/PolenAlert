@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakePollenRepository : PollenRepository {
     var result: DataResult<List<DailyPollen>> = DataResult.Success(emptyList())
+    var calls = 0
 
     override suspend fun getDailyPollen(latitude: Double, longitude: Double): DataResult<List<DailyPollen>> {
+        calls++
         return result
     }
 }
@@ -20,6 +22,10 @@ class FakePollenRepository : PollenRepository {
 class FakeUserPreferencesRepository : UserPreferencesRepository {
     private val _preferences = MutableStateFlow(UserPreferences())
     override val preferences: Flow<UserPreferences> = _preferences
+
+    fun setPreferences(prefs: UserPreferences) {
+        _preferences.value = prefs
+    }
 
     override suspend fun setName(name: String) {
         _preferences.value = _preferences.value.copy(name = name)
