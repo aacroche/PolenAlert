@@ -2,58 +2,74 @@ package com.aacroche.polenalert.ui.forecast
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.model.toForecasts
-import com.aacroche.polenalert.domain.usecase.GetDailyPollenUseCase
+import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
+import com.aacroche.polenalert.domain.usecase.MyPollenResult
+import com.aacroche.polenalert.ui.forecast.ForecastUiState.Success
+import com.aacroche.polenalert.ui.today.greetingFor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
+import java.time.Clock
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @HiltViewModel
 class ForecastViewModel @Inject constructor(
-    private val getDailyPollen: GetDailyPollenUseCase
+    private val getMyPollen: GetMyPollenUseCase,
+    private val clock: Clock
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ForecastUiState>(ForecastUiState.Loading)
-    val uiState: StateFlow<ForecastUiState> = _uiState.asStateFlow()
+    private val retryTrigger = MutableSharedFlow<Unit>(replay = 1).apply { tryEmit(Unit) }
 
-    init {
-        load()
+    val uiState: StateFlow<ForecastUiState> = retryTrigger
+        .flatMapLatest {
+            getMyPollen(ForecastViewModel.Companion.MADRID_LAT, ForecastViewModel.Companion.MADRID_LON)
+                .map { it.toUiState() }
+                .onStart { emit(ForecastUiState.Loading) }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ForecastUiState.Loading)
+
+    fun retry() {
+        retryTrigger.tryEmit(Unit)
     }
 
-    fun retry() = load()
-
-    private fun load() {
-        _uiState.value = ForecastUiState.Loading
-        viewModelScope.launch {
-            _uiState.value = when (val result = getDailyPollen(MADRID_LAT, MADRID_LON)) {
-                is DataResult.Success -> {
-                    if (result.data.size < REQUIRED_DAYS) {
-                        ForecastUiState.Empty
-                    } else {
-                        val dailyData = result.data.take(REQUIRED_DAYS)
-                        val days = dailyData.map { dailyPollen ->
-                            LocalDate.parse(dailyPollen.date)
-                        }
-                        val forecasts = dailyData.toForecasts()
-                        if (forecasts.isEmpty()) {
-                            ForecastUiState.Empty
-                        } else {
-                            ForecastUiState.Success(
-                                days = days,
-                                forecasts = forecasts
-                            )
-                        }
-                    }
+    private fun MyPollenResult.toUiState(): ForecastUiState = when (this) {
+        is MyPollenResult.Data -> {
+            if (this.days.size < REQUIRED_DAYS) {
+                ForecastUiState.Empty
+            } else {
+                val dailyData = this.days.take(REQUIRED_DAYS)
+                val days = dailyData.map { dailyPollen ->
+                    LocalDate.parse(dailyPollen.date)
                 }
-                is DataResult.Error -> {
-                    ForecastUiState.Error(result.error)
+                val forecasts = dailyData.toForecasts()
+                if (forecasts.isEmpty()) {
+                    ForecastUiState.Empty
+                } else {
+                    Success(
+                        days = days,
+                        forecasts = forecasts
+                    )
                 }
             }
+        }
+        is MyPollenResult.Error -> {
+            ForecastUiState.Error(this.error)
+        }
+
+        is MyPollenResult.NoAllergiesSelected -> {
+            val now = LocalDateTime.now(clock)
+            ForecastUiState.NoAllergies(
+                date = now.toLocalDate(),
+                greeting = greetingFor(now.hour),
+                name = this.name
+            )
         }
     }
 

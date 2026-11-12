@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -56,18 +57,19 @@ import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
 import com.aacroche.polenalert.ui.today.LoadingScreen
 import com.aacroche.polenalert.ui.today.MessageScreen
+import com.aacroche.polenalert.ui.today.TodayGreeting
 import com.aacroche.polenalert.ui.today.TodayHeader
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun ForecastDestination(viewModel: ForecastViewModel = hiltViewModel()) {
+fun ForecastDestination(viewModel: ForecastViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    ForecastScreen(state = state, onRetry = viewModel::retry)
+    ForecastScreen(state = state, onRetry = viewModel::retry, onOpenProfile = onOpenProfile)
 }
 
 @Composable
-fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit) {
+fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,6 +118,50 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit) {
                         actionText = stringResource(R.string.retry),
                         onAction = onRetry
                     )
+                }
+
+                is ForecastUiState.NoAllergies -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            horizontal = 20.dp,
+                            vertical = 12.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        item { TodayGreeting(state.date, state.greeting, state.name) }
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.choose_allergies_title),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.choose_allergies_subtitle),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(onClick = onOpenProfile) {
+                                        Text(stringResource(R.string.go_to_profile))
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -408,7 +454,8 @@ private fun ForecastScreenPreview() {
                     )
                 )
             ),
-            onRetry = {}
+            onRetry = {},
+            onOpenProfile = {}
         )
     }
 }
