@@ -8,16 +8,11 @@ import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
-import com.aacroche.polenalert.domain.model.UserPreferences
-import com.aacroche.polenalert.domain.repository.PollenRepository
-import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
-import com.aacroche.polenalert.domain.usecase.GetDailyPollenUseCase
 import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
-import com.aacroche.polenalert.ui.today.TodayViewModelTest
+import com.aacroche.polenalert.utils.FakePollenRepository
+import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -47,6 +42,7 @@ class ForecastViewModelTest {
     @Before
     fun setUp() {
         fakeRepository = FakePollenRepository()
+        userPreferencesRepository = FakeUserPreferencesRepository()
         getMyPollen = GetMyPollenUseCase(fakeRepository, userPreferencesRepository)
     }
 
@@ -79,6 +75,7 @@ class ForecastViewModelTest {
 
     @Test
     fun `when repository returns fewer than required days then emit Loading then Empty`() = runTest {
+        userPreferencesRepository.setAllergy(PollenType.GRASS, true)
         val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
         val dailyData = listOf(
             DailyPollen(date = "2023-05-01", readings = listOf(reading)),
@@ -97,6 +94,7 @@ class ForecastViewModelTest {
 
     @Test
     fun `when toForecasts returns empty list then emit Loading then Empty`() = runTest {
+        userPreferencesRepository.setAllergy(PollenType.GRASS, true)
         val reading = PollenReading(type = PollenType.GRASS, dailyMean = 0.0, level = PollenLevel.NONE)
         val dailyData = listOf(
             DailyPollen(date = "2023-05-01", readings = listOf(reading)),
@@ -131,6 +129,7 @@ class ForecastViewModelTest {
 
     @Test
     fun `when retry after error then emit Loading then Success`() = runTest {
+        userPreferencesRepository.setAllergy(PollenType.GRASS, true)
         fakeRepository.result = DataResult.Error(DataError.NO_CONNECTION)
 
         val viewModel = ForecastViewModel(getMyPollen, clock)
@@ -180,29 +179,6 @@ class ForecastViewModelTest {
             assertEquals("", noAllergies.name)
             assertEquals(R.string.greeting_morning, noAllergies.greeting)
             assertEquals(LocalDate.of(2026, 10, 27), noAllergies.date)
-        }
-    }
-
-    class FakePollenRepository : PollenRepository {
-        var result: DataResult<List<DailyPollen>> = DataResult.Success(emptyList())
-
-        override suspend fun getDailyPollen(latitude: Double, longitude: Double): DataResult<List<DailyPollen>> {
-            return result
-        }
-    }
-
-    class FakeUserPreferencesRepository : UserPreferencesRepository {
-        private val _preferences = MutableStateFlow(UserPreferences())
-        override val preferences: Flow<UserPreferences> = _preferences
-
-        override suspend fun setName(name: String) {
-            _preferences.value = _preferences.value.copy(name = name)
-        }
-
-        override suspend fun setAllergy(type: PollenType, enabled: Boolean) {
-            val currentAllergies = _preferences.value.allergies.toMutableSet()
-            if (enabled) currentAllergies.add(type) else currentAllergies.remove(type)
-            _preferences.value = _preferences.value.copy(allergies = currentAllergies)
         }
     }
 }

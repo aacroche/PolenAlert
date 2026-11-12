@@ -104,6 +104,81 @@ class GetMyPollenUseCaseTest {
         }
     }
 
+    @Test
+    fun `when multiple allergies selected then filter days to contain matching readings`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val mugwortReading = PollenReading(type = PollenType.MUGWORT, dailyMean = 5.0, level = PollenLevel.LOW)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading, grassReading, mugwortReading))
+        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePreferencesRepository.setPreferences(
+            UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE, PollenType.GRASS))
+        )
+
+        getMyPollenUseCase(40.42, -3.70).test {
+            val item = awaitItem() as MyPollenResult.Data
+            assertEquals("Test", item.name)
+            val filteredTypes = item.days.first().readings.map { it.type }
+            assertEquals(listOf(PollenType.OLIVE, PollenType.GRASS), filteredTypes)
+        }
+    }
+
+    @Test
+    fun `when selected allergy is not in readings then return empty readings for day`() = runTest {
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(grassReading))
+        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+
+        getMyPollenUseCase(40.42, -3.70).test {
+            val item = awaitItem() as MyPollenResult.Data
+            assertEquals("Test", item.name)
+            assertEquals(0, item.days.first().readings.size)
+        }
+    }
+
+    @Test
+    fun `when user updates name then emit updated name in result`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading))
+        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Alice", allergies = setOf(PollenType.OLIVE)))
+
+        getMyPollenUseCase(40.42, -3.70).test {
+            val firstItem = awaitItem() as MyPollenResult.Data
+            assertEquals("Alice", firstItem.name)
+
+            fakePreferencesRepository.setName("Bob")
+
+            val secondItem = awaitItem() as MyPollenResult.Data
+            assertEquals("Bob", secondItem.name)
+        }
+    }
+
+    @Test
+    fun `when 4 days of pollen data returned then filter readings for all 4 days`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+
+        val dailyData = listOf(
+            DailyPollen(date = "2026-10-27", readings = listOf(oliveReading, grassReading)),
+            DailyPollen(date = "2026-10-28", readings = listOf(oliveReading, grassReading)),
+            DailyPollen(date = "2026-10-29", readings = listOf(oliveReading, grassReading)),
+            DailyPollen(date = "2026-10-30", readings = listOf(oliveReading, grassReading))
+        )
+        fakePollenRepository.result = DataResult.Success(dailyData)
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+
+        getMyPollenUseCase(40.42, -3.70).test {
+            val item = awaitItem() as MyPollenResult.Data
+            assertEquals(4, item.days.size)
+            item.days.forEach { day ->
+                assertEquals(1, day.readings.size)
+                assertEquals(PollenType.OLIVE, day.readings.first().type)
+            }
+        }
+    }
+
     class FakePollenRepository : PollenRepository {
         var result: DataResult<List<DailyPollen>> = DataResult.Success(emptyList())
         var calls = 0
