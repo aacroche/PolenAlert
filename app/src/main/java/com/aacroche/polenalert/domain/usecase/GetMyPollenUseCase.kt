@@ -37,8 +37,8 @@ class GetMyPollenUseCase @Inject constructor(
                 preferencesRepository.preferences
             ) { result, prefs ->
                 when {
+                    refresh is DataResult.Error -> MyPollenResult.Error(prefs.name, refresh.error) //first dataResult from api error
                     prefs.allergies.isEmpty() -> MyPollenResult.NoAllergiesSelected(prefs.name)
-                    refresh is DataResult.Error -> MyPollenResult.Error(prefs.name, refresh.error)
                     else -> MyPollenResult.Data(
                         prefs.name,
                         result.filteredByAllergies(prefs.allergies)

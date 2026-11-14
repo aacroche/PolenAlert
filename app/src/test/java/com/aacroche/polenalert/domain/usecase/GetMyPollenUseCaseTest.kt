@@ -12,8 +12,10 @@ import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -33,6 +35,12 @@ class GetMyPollenUseCaseTest {
         fakePollenRepository = FakePollenRepository()
         fakePreferencesRepository = FakeUserPreferencesRepository()
         getMyPollenUseCase = GetMyPollenUseCase(fakePollenRepository, fakePreferencesRepository)
+    }
+
+    @Test
+    fun `refresh error has priority over no allergies`() = runTest {
+        fakePollenRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+        assertTrue(getMyPollenUseCase().first() is MyPollenResult.Error)
     }
 
     @Test
