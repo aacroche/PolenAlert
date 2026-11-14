@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.room)
 }
 
 android {
@@ -46,6 +47,8 @@ android {
     }
 }
 
+room { schemaDirectory("$projectDir/schemas") }
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -70,6 +73,11 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     ksp(libs.hilt.compiler)
 
+    //room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    androidTestImplementation(libs.room.testing)
 
     testImplementation(libs.junit)
     testImplementation(libs.turbine)
