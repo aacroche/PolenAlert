@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -47,6 +46,8 @@ import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
+import com.aacroche.polenalert.ui.components.ChooseAllergiesCard
+import com.aacroche.polenalert.ui.components.ScreenGreeting
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
 import com.aacroche.polenalert.ui.theme.dominantRisk
@@ -54,8 +55,6 @@ import com.aacroche.polenalert.ui.theme.getImg
 import com.aacroche.polenalert.ui.theme.labelRes
 import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun TodayDestination(viewModel: TodayViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
@@ -83,8 +82,8 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        item { TodayGreeting(state.date, state.greeting, state.name) }
-                        item { RiskHeroCard(state.dominant)}
+                        item { ScreenGreeting(state.date, state.greeting, state.name) }
+                        item { RiskHeroCard(state.dominant) }
                         item { SectionTitle(state.updatedAt) }
                         items(
                             items = state.today.readings,
@@ -139,38 +138,8 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                         ),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        item { TodayGreeting(state.date, state.greeting, state.name) }
-                        item {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.choose_allergies_title),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.choose_allergies_subtitle),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Button(onClick = onOpenProfile) {
-                                        Text(stringResource(R.string.go_to_profile))
-                                    }
-                                }
-                            }
-                        }
+                        item { ScreenGreeting(state.date, state.greeting, state.name) }
+                        item { ChooseAllergiesCard(onOpenProfile) }
                     }
                 }
             }
@@ -184,12 +153,14 @@ fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
     val onCard = MaterialTheme.colorScheme.onPrimary
 
     Card(
-        modifier = modifier.fillMaxWidth(),           
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -201,7 +172,11 @@ fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(Modifier.size(8.dp).background(levelContent, CircleShape))
+                    Box(
+                        Modifier
+                            .size(8.dp)
+                            .background(levelContent, CircleShape)
+                    )
                     Text(
                         text = stringResource(dominant.level.dominantRisk()),
                         style = MaterialTheme.typography.labelMedium,
@@ -209,7 +184,10 @@ fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
                     )
                 }
                 Text(
-                    text = stringResource(R.string.risk_title, stringResource(dominant.type.nameRes())),
+                    text = stringResource(
+                        R.string.risk_title,
+                        stringResource(dominant.type.nameRes())
+                    ),
                     style = MaterialTheme.typography.titleLarge,
                     color = onCard
                 )
@@ -242,9 +220,9 @@ fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
 private fun RiskHeroCardPreview() {
     PolenAlertTheme {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            RiskHeroCard(PollenReading(PollenType.MUGWORT, PollenLevel.LOW,6.9))
-            RiskHeroCard(PollenReading(PollenType.GRASS, PollenLevel.MEDIUM,34.0))
-            RiskHeroCard(PollenReading(PollenType.OLIVE, PollenLevel.HIGH,210.0))
+            RiskHeroCard(PollenReading(PollenType.MUGWORT, PollenLevel.LOW, 6.9))
+            RiskHeroCard(PollenReading(PollenType.GRASS, PollenLevel.MEDIUM, 34.0))
+            RiskHeroCard(PollenReading(PollenType.OLIVE, PollenLevel.HIGH, 210.0))
         }
     }
 }
@@ -258,35 +236,14 @@ fun SectionTitle(updatedAt: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(stringResource(R.string.section_title), style = MaterialTheme.typography.titleMedium)
+        Text(
+            stringResource(R.string.section_title),
+            style = MaterialTheme.typography.titleMedium
+        )
         Text(
             text = stringResource(R.string.updated_at, updatedAt),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-fun TodayGreeting(date: LocalDate, @androidx.annotation.StringRes greeting: Int, name: String) {
-    val pattern = stringResource(R.string.date_pattern)
-    val locale = LocalConfiguration.current.locales[0]
-    val dateText = date.format(DateTimeFormatter.ofPattern(pattern, locale)).uppercase(locale)
-
-    val greetingText = stringResource(greeting)
-    val text = if (name.isBlank()) greetingText
-               else stringResource(R.string.greeting_with_name, greetingText, name)
-
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = stringResource(R.string.today_date, dateText),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.secondary
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -301,7 +258,10 @@ fun TodayHeader(location: String, modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp)),
+                .background(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    RoundedCornerShape(12.dp)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
