@@ -8,6 +8,7 @@ import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
 import com.aacroche.polenalert.domain.usecase.MyPollenResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -32,7 +32,7 @@ class TodayViewModel @Inject constructor(
 
     val uiState: StateFlow<TodayUiState> = retryTrigger
         .flatMapLatest {
-            getMyPollen(MADRID_LAT, MADRID_LON)
+            getMyPollen()
                 .map { it.toUiState() }
                 .onStart { emit(TodayUiState.Loading) }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState.Loading)
@@ -80,10 +80,5 @@ class TodayViewModel @Inject constructor(
                 name = this.name
             )
         }
-    }
-
-    private companion object {
-        const val MADRID_LAT = 40.42
-        const val MADRID_LON = -3.70
     }
 }

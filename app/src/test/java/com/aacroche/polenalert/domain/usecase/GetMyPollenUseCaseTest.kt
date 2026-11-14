@@ -39,10 +39,10 @@ class GetMyPollenUseCaseTest {
     fun `when no allergies selected then emit NoAllergiesSelected`() = runTest {
         val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
         val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(reading))
-        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePollenRepository.days.value = listOf(dailyPollen)
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = emptySet()))
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             val item = awaitItem() as MyPollenResult.NoAllergiesSelected
             assertEquals("Test", item.name)
         }
@@ -53,10 +53,10 @@ class GetMyPollenUseCaseTest {
         val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
         val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
         val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading, grassReading))
-        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePollenRepository.days.value = listOf(dailyPollen)
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             val item = awaitItem() as MyPollenResult.Data
             assertEquals("Test", item.name)
             assertEquals(1, item.days.first().readings.size)
@@ -66,10 +66,10 @@ class GetMyPollenUseCaseTest {
 
     @Test
     fun `when repository returns error then emit Error`() = runTest {
-        fakePollenRepository.result = DataResult.Error(DataError.NO_CONNECTION)
+        fakePollenRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             val item = awaitItem() as MyPollenResult.Error
             assertEquals("Test", item.name)
             assertEquals(DataError.NO_CONNECTION, item.error)
@@ -81,10 +81,10 @@ class GetMyPollenUseCaseTest {
         val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
         val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
         val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading, grassReading))
-        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePollenRepository.days.value = listOf(dailyPollen)
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = emptySet()))
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             // Initial emit: No allergies
             val firstItem = awaitItem() as MyPollenResult.NoAllergiesSelected
             assertEquals("Test", firstItem.name)
@@ -97,7 +97,7 @@ class GetMyPollenUseCaseTest {
             assertEquals(1, secondItem.days.first().readings.size)
             assertEquals(PollenType.OLIVE, secondItem.days.first().readings.first().type)
 
-            // Verify API was called exactly once
+            // Verify API refresh was called exactly once
             assertEquals(1, fakePollenRepository.calls)
         }
     }
@@ -108,12 +108,12 @@ class GetMyPollenUseCaseTest {
         val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
         val mugwortReading = PollenReading(type = PollenType.MUGWORT, dailyMean = 5.0, level = PollenLevel.LOW)
         val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading, grassReading, mugwortReading))
-        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePollenRepository.days.value = listOf(dailyPollen)
         fakePreferencesRepository.setPreferences(
             UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE, PollenType.GRASS))
         )
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             val item = awaitItem() as MyPollenResult.Data
             assertEquals("Test", item.name)
             val filteredTypes = item.days.first().readings.map { it.type }
@@ -125,10 +125,10 @@ class GetMyPollenUseCaseTest {
     fun `when selected allergy is not in readings then return empty readings for day`() = runTest {
         val grassReading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
         val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(grassReading))
-        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePollenRepository.days.value = listOf(dailyPollen)
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             val item = awaitItem() as MyPollenResult.Data
             assertEquals("Test", item.name)
             assertEquals(0, item.days.first().readings.size)
@@ -139,10 +139,10 @@ class GetMyPollenUseCaseTest {
     fun `when user updates name then emit updated name in result`() = runTest {
         val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
         val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading))
-        fakePollenRepository.result = DataResult.Success(listOf(dailyPollen))
+        fakePollenRepository.days.value = listOf(dailyPollen)
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Alice", allergies = setOf(PollenType.OLIVE)))
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             val firstItem = awaitItem() as MyPollenResult.Data
             assertEquals("Alice", firstItem.name)
 
@@ -164,10 +164,10 @@ class GetMyPollenUseCaseTest {
             DailyPollen(date = "2026-10-29", readings = listOf(oliveReading, grassReading)),
             DailyPollen(date = "2026-10-30", readings = listOf(oliveReading, grassReading))
         )
-        fakePollenRepository.result = DataResult.Success(dailyData)
+        fakePollenRepository.days.value = dailyData
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
 
-        getMyPollenUseCase(40.42, -3.70).test {
+        getMyPollenUseCase().test {
             val item = awaitItem() as MyPollenResult.Data
             assertEquals(4, item.days.size)
             item.days.forEach { day ->
