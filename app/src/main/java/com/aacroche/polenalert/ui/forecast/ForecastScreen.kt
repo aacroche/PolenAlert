@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +47,8 @@ import com.aacroche.polenalert.domain.model.PollenForecast
 import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.Trend
+import com.aacroche.polenalert.ui.components.ChooseAllergiesCard
+import com.aacroche.polenalert.ui.components.ScreenGreeting
 import com.aacroche.polenalert.ui.theme.Inter
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
@@ -57,7 +58,6 @@ import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
 import com.aacroche.polenalert.ui.today.LoadingScreen
 import com.aacroche.polenalert.ui.today.MessageScreen
-import com.aacroche.polenalert.ui.today.TodayGreeting
 import com.aacroche.polenalert.ui.today.TodayHeader
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -129,38 +129,8 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                         ),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        item { TodayGreeting(state.date, state.greeting, state.name) }
-                        item {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.choose_allergies_title),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.choose_allergies_subtitle),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Button(onClick = onOpenProfile) {
-                                        Text(stringResource(R.string.go_to_profile))
-                                    }
-                                }
-                            }
-                        }
+                        item { ScreenGreeting(state.date, state.greeting, state.name) }
+                        item { ChooseAllergiesCard(onOpenProfile) }
                     }
                 }
             }
@@ -168,294 +138,310 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
     }
 }
 
-@Composable
-fun ForecastContent(
-    days: List<LocalDate>,
-    forecasts: List<PollenForecast>,
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            horizontal = 20.dp,
-            vertical = 12.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    @Composable
+    fun ForecastContent(
+        days: List<LocalDate>,
+        forecasts: List<PollenForecast>,
+        modifier: Modifier = Modifier
     ) {
-        item {
-            ForecastHeader()
-        }
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                horizontal = 20.dp,
+                vertical = 12.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                ForecastHeader()
+            }
 
-        item {
-            ForecastSectionTitle()
-        }
+            item {
+                ForecastSectionTitle()
+            }
 
-        item {
-            DaysHeaderRow(days = days)
-        }
+            item {
+                DaysHeaderRow(days = days)
+            }
 
-        items(
-            items = forecasts,
-            key = { it.type }
-        ) { forecast ->
-            ForecastCard(forecast = forecast)
-        }
+            items(
+                items = forecasts,
+                key = { it.type }
+            ) { forecast ->
+                ForecastCard(forecast = forecast)
+            }
 
-        item {
-            ForecastLegend()
+            item {
+                ForecastLegend()
+            }
         }
     }
-}
 
-@Composable
-fun ForecastHeader() {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = stringResource(R.string.forecast_title),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = stringResource(R.string.forecast_subtitle),
-            style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-fun ForecastSectionTitle() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(R.string.section_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = stringResource(R.string.forecast_levels_header),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-fun DaysHeaderRow(days: List<LocalDate>) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        days.forEach { date ->
-            DayHeaderItem(
-                date = date,
-                modifier = Modifier.weight(1f)
+    @Composable
+    fun ForecastHeader() {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = stringResource(R.string.forecast_title),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = stringResource(R.string.forecast_subtitle),
+                style = TextStyle(fontFamily = Inter, fontSize = 13.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
-}
 
-@Composable
-fun DayHeaderItem(date: LocalDate, modifier: Modifier = Modifier) {
-    val locale = LocalConfiguration.current.locales[0]
-    val dayOfWeek = date.format(DateTimeFormatter.ofPattern("EEE", locale))
-        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
-    val dayAndMonth = date.format(DateTimeFormatter.ofPattern("d MMM", locale)).lowercase(locale)
-
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Text(
-            text = dayOfWeek,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = dayAndMonth,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+    @Composable
+    fun ForecastSectionTitle() {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.section_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = stringResource(R.string.forecast_levels_header),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
-}
 
-@Composable
-fun ForecastCard(forecast: PollenForecast) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(
+    @Composable
+    fun DaysHeaderRow(days: List<LocalDate>) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(forecast.type.getImg()),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(8.dp))
+            days.forEach { date ->
+                DayHeaderItem(
+                    date = date,
+                    modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(9.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(forecast.type.nameRes()),
-                        style = TextStyle(
-                            fontFamily = Inter,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
+            }
+        }
+    }
+
+    @Composable
+    fun DayHeaderItem(date: LocalDate, modifier: Modifier = Modifier) {
+        val locale = LocalConfiguration.current.locales[0]
+        val dayOfWeek = date.format(DateTimeFormatter.ofPattern("EEE", locale))
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+        val dayAndMonth =
+            date.format(DateTimeFormatter.ofPattern("d MMM", locale)).lowercase(locale)
+
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = dayOfWeek,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = dayAndMonth,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+
+    @Composable
+    fun ForecastCard(forecast: PollenForecast) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(forecast.type.getImg()),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(8.dp))
                     )
+                    Spacer(modifier = Modifier.width(9.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(forecast.type.nameRes()),
+                            style = TextStyle(
+                                fontFamily = Inter,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = forecast.type.scientificName(),
+                            style = TextStyle(
+                                fontFamily = Inter,
+                                fontStyle = FontStyle.Italic,
+                                fontSize = 10.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     Text(
-                        text = forecast.type.scientificName(),
+                        text = stringResource(forecast.trend.labelRes()),
                         style = TextStyle(
                             fontFamily = Inter,
-                            fontStyle = FontStyle.Italic,
                             fontSize = 10.sp
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Text(
-                    text = stringResource(forecast.trend.labelRes()),
-                    style = TextStyle(
-                        fontFamily = Inter,
-                        fontSize = 10.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                forecast.levels.forEach { level ->
-                    DayLevelChip(
-                        level = level,
-                        modifier = Modifier.weight(1f)
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    forecast.levels.forEach { level ->
+                        DayLevelChip(
+                            level = level,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
     }
-}
 
-@Composable
-fun DayLevelChip(level: PollenLevel, modifier: Modifier = Modifier) {
-    val (contentColor, containerColor) = level.colors()
-    Box(
-        modifier = modifier
-            .height(22.dp)
-            .background(containerColor, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(level.labelRes()),
-            style = TextStyle(
-                fontFamily = Inter,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp
-            ),
-            color = contentColor,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-fun ForecastLegend(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(R.string.legend_levels),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+    @Composable
+    fun DayLevelChip(level: PollenLevel, modifier: Modifier = Modifier) {
+        val (contentColor, containerColor) = level.colors()
+        Box(
+            modifier = modifier
+                .height(22.dp)
+                .background(containerColor, CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            LegendItem(level = PollenLevel.LOW)
-            LegendItem(level = PollenLevel.MEDIUM)
-            LegendItem(level = PollenLevel.HIGH)
+            Text(
+                text = stringResource(level.labelRes()),
+                style = TextStyle(
+                    fontFamily = Inter,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp
+                ),
+                color = contentColor,
+                textAlign = TextAlign.Center
+            )
         }
     }
-}
 
-@Composable
-private fun LegendItem(level: PollenLevel) {
-    val (contentColor, _) = level.colors()
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .background(contentColor, CircleShape)
-        )
-        Text(
-            text = stringResource(level.labelRes()),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+    @Composable
+    fun ForecastLegend(modifier: Modifier = Modifier) {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.legend_levels),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LegendItem(level = PollenLevel.LOW)
+                LegendItem(level = PollenLevel.MEDIUM)
+                LegendItem(level = PollenLevel.HIGH)
+            }
+        }
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-private fun ForecastScreenPreview() {
-    PolenAlertTheme {
-        ForecastScreen(
-            state = ForecastUiState.Success(
-                days = listOf(
-                    LocalDate.now(),
-                    LocalDate.now().plusDays(1),
-                    LocalDate.now().plusDays(2),
-                    LocalDate.now().plusDays(3)
-                ),
-                forecasts = listOf(
-                    PollenForecast(
-                        type = PollenType.GRASS,
-                        levels = listOf(PollenLevel.LOW, PollenLevel.MEDIUM, PollenLevel.HIGH, PollenLevel.HIGH),
-                        trend = Trend.RISING
+    @Composable
+    private fun LegendItem(level: PollenLevel) {
+        val (contentColor, _) = level.colors()
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(contentColor, CircleShape)
+            )
+            Text(
+                text = stringResource(level.labelRes()),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    private fun ForecastScreenPreview() {
+        PolenAlertTheme {
+            ForecastScreen(
+                state = ForecastUiState.Success(
+                    days = listOf(
+                        LocalDate.now(),
+                        LocalDate.now().plusDays(1),
+                        LocalDate.now().plusDays(2),
+                        LocalDate.now().plusDays(3)
                     ),
-                    PollenForecast(
-                        type = PollenType.OLIVE,
-                        levels = listOf(PollenLevel.MEDIUM, PollenLevel.LOW, PollenLevel.LOW, PollenLevel.NONE),
-                        trend = Trend.FALLING
-                    ),
-                    PollenForecast(
-                        type = PollenType.MUGWORT,
-                        levels = listOf(PollenLevel.LOW, PollenLevel.LOW, PollenLevel.LOW, PollenLevel.LOW),
-                        trend = Trend.STABLE
+                    forecasts = listOf(
+                        PollenForecast(
+                            type = PollenType.GRASS,
+                            levels = listOf(
+                                PollenLevel.LOW,
+                                PollenLevel.MEDIUM,
+                                PollenLevel.HIGH,
+                                PollenLevel.HIGH
+                            ),
+                            trend = Trend.RISING
+                        ),
+                        PollenForecast(
+                            type = PollenType.OLIVE,
+                            levels = listOf(
+                                PollenLevel.MEDIUM,
+                                PollenLevel.LOW,
+                                PollenLevel.LOW,
+                                PollenLevel.NONE
+                            ),
+                            trend = Trend.FALLING
+                        ),
+                        PollenForecast(
+                            type = PollenType.MUGWORT,
+                            levels = listOf(
+                                PollenLevel.LOW,
+                                PollenLevel.LOW,
+                                PollenLevel.LOW,
+                                PollenLevel.LOW
+                            ),
+                            trend = Trend.STABLE
+                        )
                     )
-                )
-            ),
-            onRetry = {},
-            onOpenProfile = {}
-        )
+                ),
+                onRetry = {},
+                onOpenProfile = {}
+            )
+        }
     }
-}
