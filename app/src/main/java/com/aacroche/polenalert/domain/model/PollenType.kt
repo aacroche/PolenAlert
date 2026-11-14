@@ -19,4 +19,5 @@ enum class PollenType(val lowMax: Double, val medMax: Double) {
         grainsPerM3 <= medMax -> PollenLevel.MEDIUM
         else -> PollenLevel.HIGH
     }
+
 }

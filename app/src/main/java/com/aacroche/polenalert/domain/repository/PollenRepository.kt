@@ -2,7 +2,9 @@ package com.aacroche.polenalert.domain.repository
 
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataResult
+import kotlinx.coroutines.flow.Flow
 
 interface PollenRepository {
-    suspend fun getDailyPollen(latitude: Double, longitude: Double): DataResult<List<DailyPollen>>
+    fun observeDailyPollen(): Flow<List<DailyPollen>>
+    suspend fun refresh(latitude: Double, longitude: Double): DataResult<Unit>
 }

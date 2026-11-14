@@ -30,7 +30,7 @@ class ForecastViewModel @Inject constructor(
 
     val uiState: StateFlow<ForecastUiState> = retryTrigger
         .flatMapLatest {
-            getMyPollen(ForecastViewModel.Companion.MADRID_LAT, ForecastViewModel.Companion.MADRID_LON)
+            getMyPollen()
                 .map { it.toUiState() }
                 .onStart { emit(ForecastUiState.Loading) }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ForecastUiState.Loading)

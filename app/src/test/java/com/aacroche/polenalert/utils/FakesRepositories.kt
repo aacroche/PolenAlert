@@ -10,12 +10,32 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakePollenRepository : PollenRepository {
-    var result: DataResult<List<DailyPollen>> = DataResult.Success(emptyList())
+    val days = MutableStateFlow<List<DailyPollen>>(emptyList())
+    var refreshResult: DataResult<Unit> = DataResult.Success(Unit)
     var calls = 0
 
-    override suspend fun getDailyPollen(latitude: Double, longitude: Double): DataResult<List<DailyPollen>> {
+    var result: DataResult<List<DailyPollen>>
+        get() = when (val res = refreshResult) {
+            is DataResult.Error -> DataResult.Error(res.error)
+            is DataResult.Success -> DataResult.Success(days.value)
+        }
+        set(value) {
+            when (value) {
+                is DataResult.Success -> {
+                    refreshResult = DataResult.Success(Unit)
+                    days.value = value.data
+                }
+                is DataResult.Error -> {
+                    refreshResult = DataResult.Error(value.error)
+                    days.value = emptyList()
+                }
+            }
+        }
+
+    override fun observeDailyPollen() = days
+    override suspend fun refresh(latitude: Double, longitude: Double): DataResult<Unit> {
         calls++
-        return result
+        return refreshResult
     }
 }
 

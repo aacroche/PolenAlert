@@ -3,11 +3,13 @@ package com.aacroche.polenalert.domain.usecase
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
+import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 
 sealed interface MyPollenResult {
@@ -18,27 +20,36 @@ sealed interface MyPollenResult {
     data class Error(override val name: String, val error: DataError) : MyPollenResult
 }
 
+const val LATITUDE = 40.42
+const val LONGITUDE = -3.70
+
 class GetMyPollenUseCase @Inject constructor(
     private val pollenRepository: PollenRepository,
     private val preferencesRepository: UserPreferencesRepository,
 ) {
-    operator fun invoke(latitude: Double, longitude: Double): Flow<MyPollenResult> {
-        val pollen = flow { emit(pollenRepository.getDailyPollen(latitude, longitude)) }
 
-        return combine(pollen, preferencesRepository.preferences) { result, prefs ->
-            when (result) {
-                is DataResult.Error -> MyPollenResult.Error(prefs.name, result.error)
-                is DataResult.Success -> {
-                    if (prefs.allergies.isEmpty()) {
-                        MyPollenResult.NoAllergiesSelected(prefs.name)
-                    } else {
-                        val filteredDays = result.data.map { day ->
-                            day.copy(readings = day.readings.filter { it.type in prefs.allergies })
-                        }
-                        MyPollenResult.Data(prefs.name, filteredDays)
-                    }
+
+    operator fun invoke(): Flow<MyPollenResult> = flow {
+        val refresh = pollenRepository.refresh(LATITUDE, LONGITUDE)
+        emitAll(
+            combine(
+                pollenRepository.observeDailyPollen(),
+                preferencesRepository.preferences
+            ) { result, prefs ->
+                when {
+                    refresh is DataResult.Error -> MyPollenResult.Error(prefs.name, refresh.error) //first dataResult from api error
+                    prefs.allergies.isEmpty() -> MyPollenResult.NoAllergiesSelected(prefs.name)
+                    else -> MyPollenResult.Data(
+                        prefs.name,
+                        result.filteredByAllergies(prefs.allergies)
+                    )
                 }
             }
-        }
+        )
     }
 }
+
+fun List<DailyPollen>.filteredByAllergies(allergies: Set<PollenType>): List<DailyPollen> =
+    this.map { day ->
+        day.copy(readings = day.readings.filter { it.type in allergies })
+    }
