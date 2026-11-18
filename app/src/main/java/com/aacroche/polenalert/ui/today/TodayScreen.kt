@@ -26,7 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,7 +77,7 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
         Box(Modifier.weight(1f)) {
             when (state) {
                 is TodayUiState.Success -> {
-                    var isDismissed by remember { mutableStateOf(false) }
+                    var isDismissed by rememberSaveable(state.isOffline) { mutableStateOf(false) }
                     if (state.isOffline && !isDismissed) {
                         MessageScreenWithTwoButtons(
                             title = stringResource(R.string.offline_title),
