@@ -6,12 +6,14 @@ import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakePollenRepository : PollenRepository {
     val days = MutableStateFlow<List<DailyPollen>>(emptyList())
     var refreshResult: DataResult<Unit> = DataResult.Success(Unit)
+    var refreshGate: CompletableDeferred<Unit>? = null
     var calls = 0
 
     var result: DataResult<List<DailyPollen>>
@@ -35,6 +37,7 @@ class FakePollenRepository : PollenRepository {
     override fun observeDailyPollen() = days
     override suspend fun refresh(latitude: Double, longitude: Double): DataResult<Unit> {
         calls++
+        refreshGate?.await()
         return refreshResult
     }
 }

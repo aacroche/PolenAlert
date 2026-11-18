@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.aacroche.polenalert.domain.model.toForecasts
 import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
 import com.aacroche.polenalert.domain.usecase.MyPollenResult
+import com.aacroche.polenalert.ui.forecast.ForecastUiState.NoAllergies
 import com.aacroche.polenalert.ui.forecast.ForecastUiState.Success
 import com.aacroche.polenalert.ui.today.greetingFor
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,7 +55,8 @@ class ForecastViewModel @Inject constructor(
                 } else {
                     Success(
                         days = days,
-                        forecasts = forecasts
+                        forecasts = forecasts,
+                        isOffline = this.isOffline
                     )
                 }
             }
@@ -65,12 +67,14 @@ class ForecastViewModel @Inject constructor(
 
         is MyPollenResult.NoAllergiesSelected -> {
             val now = LocalDateTime.now(clock)
-            ForecastUiState.NoAllergies(
+            NoAllergies(
                 date = now.toLocalDate(),
                 greeting = greetingFor(now.hour),
                 name = this.name
             )
         }
+
+        MyPollenResult.Loading -> ForecastUiState.Loading
     }
 
     private companion object {

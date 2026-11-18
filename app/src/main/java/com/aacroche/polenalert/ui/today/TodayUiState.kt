@@ -15,7 +15,8 @@ sealed interface TodayUiState {
         @StringRes val greeting: Int,
         val updatedAt: String,
         val dominant: PollenReading,
-        val name: String
+        val name: String,
+        val isOffline: Boolean
     ) : TodayUiState
 
     data object OutOfSeason : TodayUiState
