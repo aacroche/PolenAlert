@@ -209,11 +209,13 @@ class GetMyPollenUseCaseTest {
         fakePollenRepository.days.value = listOf(dailyPollen)
         fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
         fakePollenRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+        fakePollenRepository.refreshGate = CompletableDeferred()
 
         getMyPollenUseCase().test {
-            val item = awaitItem() as MyPollenResult.Data
-            assertEquals("Test", item.name)
-            assertTrue(item.isOffline)
+            assertFalse((awaitItem() as MyPollenResult.Data).isOffline)   // caché mientras refresca
+            fakePollenRepository.refreshGate!!.complete(Unit)
+            assertTrue((awaitItem() as MyPollenResult.Data).isOffline)    // falla la red → aviso
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

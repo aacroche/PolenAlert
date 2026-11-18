@@ -73,6 +73,7 @@
     <string name="choose_allergies_subtitle">Así te mostraremos solo los pólenes que te afectan</string>
     <string name="go_to_profile">Ir a Perfil</string>
     <string name="offline_title">Tus últimos datos siguen aquí</string>
-    <string name="offline_message">Mostramos los últimos datos guardados./nPueden haber cambiado y no reflejan el polen actual.</string>
+    <string name="offline_message">Mostramos los últimos datos guardados.\nPueden haber cambiado y no reflejan el polen actual.</string>
     <string name="offline_text_button">Ver datos guardados</string>
+    <string name="offline_risk_data">DATOS GUARDADOS · NO ACTUALES</string>
 </resources>

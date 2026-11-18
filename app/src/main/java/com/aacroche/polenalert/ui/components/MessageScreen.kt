@@ -86,7 +86,7 @@ fun MessageScreenWithTwoButtons(
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = onDismiss, colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onBackground,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) { Text(actionText) }

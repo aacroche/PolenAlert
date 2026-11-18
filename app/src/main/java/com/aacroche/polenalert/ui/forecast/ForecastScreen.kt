@@ -55,6 +55,7 @@ import com.aacroche.polenalert.ui.components.LoadingScreen
 import com.aacroche.polenalert.ui.components.MessageScreen
 import com.aacroche.polenalert.ui.components.MessageScreenWithTwoButtons
 import com.aacroche.polenalert.ui.components.ScreenGreeting
+import com.aacroche.polenalert.ui.components.TodayHeader
 import com.aacroche.polenalert.ui.theme.Inter
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
@@ -62,7 +63,6 @@ import com.aacroche.polenalert.ui.theme.getImg
 import com.aacroche.polenalert.ui.theme.labelRes
 import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
-import com.aacroche.polenalert.ui.today.TodayHeader
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

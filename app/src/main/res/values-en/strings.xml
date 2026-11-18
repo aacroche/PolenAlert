@@ -74,6 +74,7 @@
     <string name="choose_allergies_subtitle">This way we will only show you the pollens that affect you</string>
     <string name="go_to_profile">Go to Profile</string>
     <string name="offline_title">Your last data is saved</string>
-    <string name="offline_message">It\'s showing the last saved data. /nData may be change and this is not updated.</string>
+    <string name="offline_message">It\'s showing the last saved data. \nData may be change and this is not updated.</string>
     <string name="offline_text_button">See saved data</string>
+    <string name="offline_risk_data">SAVED DATA · NOT UPDATED</string>
 </resources>

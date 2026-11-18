@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +50,7 @@ import com.aacroche.polenalert.ui.components.LoadingScreen
 import com.aacroche.polenalert.ui.components.MessageScreen
 import com.aacroche.polenalert.ui.components.MessageScreenWithTwoButtons
 import com.aacroche.polenalert.ui.components.ScreenGreeting
+import com.aacroche.polenalert.ui.components.TodayHeader
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
 import com.aacroche.polenalert.ui.theme.dominantRisk
@@ -97,7 +97,7 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             item { ScreenGreeting(state.date, state.greeting, state.name) }
-                            item { RiskHeroCard(state.dominant) }
+                            item { RiskHeroCard(state.dominant,  state.isOffline) }
                             item { SectionTitle(state.updatedAt, state.isOffline) }
                             items(
                                 items = state.today.readings,
@@ -163,7 +163,7 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
 }
 
 @Composable
-fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
+fun RiskHeroCard(dominant: PollenReading, isOffline: Boolean = false, modifier: Modifier = Modifier) {
     val (levelContent, _) = dominant.level.colors()
     val onCard = MaterialTheme.colorScheme.onPrimary
 
@@ -193,7 +193,7 @@ fun RiskHeroCard(dominant: PollenReading, modifier: Modifier = Modifier) {
                             .background(levelContent, CircleShape)
                     )
                     Text(
-                        text = stringResource(dominant.level.dominantRisk()),
+                        text = if (isOffline) stringResource(R.string.offline_risk_data) else stringResource(dominant.level.dominantRisk()),
                         style = MaterialTheme.typography.labelMedium,
                         color = onCard
                     )
@@ -258,44 +258,6 @@ fun SectionTitle(updatedAt: String, isOffline: Boolean, modifier: Modifier = Mod
         if(!isOffline) {
             Text(
                 text = stringResource(R.string.updated_at, updatedAt),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun TodayHeader(location: String, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .background(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_sprout),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(21.dp)
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-            Text(
-                text = stringResource(R.string.pollen_alert_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = location,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
