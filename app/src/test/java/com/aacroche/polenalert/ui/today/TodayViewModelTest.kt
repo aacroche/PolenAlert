@@ -16,6 +16,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -227,6 +229,27 @@ class TodayViewModelTest {
             assertEquals("", noAllergies.name)
             assertEquals(LocalDate.of(2026, 10, 27), noAllergies.date)
             assertEquals(R.string.greeting_morning, noAllergies.greeting)
+        }
+    }
+
+    @Test
+    fun `when repository has cached data and refresh error then emit Success with isOffline true`() = runTest {
+        val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val today = DailyPollen(date = "2023-05-01", readings = listOf(reading))
+        fakeRepository.days.value = listOf(today)
+        fakeRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+        fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = TodayViewModel(getMyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val firstSuccess = awaitItem() as TodayUiState.Success
+            assertFalse(firstSuccess.isOffline)
+            val secondSuccess = awaitItem() as TodayUiState.Success
+            assertTrue(secondSuccess.isOffline)
+            assertEquals(today, secondSuccess.today)
         }
     }
 

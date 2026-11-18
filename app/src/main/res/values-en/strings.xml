@@ -5,6 +5,7 @@
     <string name="retry">Retry</string>
 
     <!-- UI States -->
+    <string name="retry_connection">Retry connection</string>
     <string name="out_of_season">Out of pollen season</string>
 
     <!-- Errors -->
@@ -72,4 +73,8 @@
     <string name="choose_allergies_title">Choose your allergies</string>
     <string name="choose_allergies_subtitle">This way we will only show you the pollens that affect you</string>
     <string name="go_to_profile">Go to Profile</string>
+    <string name="offline_title">Your last data is saved</string>
+    <string name="offline_message">Showing the last saved data. \nIt may have changed and doesn’t reflect current pollen levels.</string>
+    <string name="offline_text_button">See saved data</string>
+    <string name="offline_risk_data">SAVED DATA · NOT UPDATED</string>
 </resources>

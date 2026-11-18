@@ -16,6 +16,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -179,6 +181,32 @@ class ForecastViewModelTest {
             assertEquals("", noAllergies.name)
             assertEquals(R.string.greeting_morning, noAllergies.greeting)
             assertEquals(LocalDate.of(2026, 10, 27), noAllergies.date)
+        }
+    }
+
+    @Test
+    fun `when repository has cached data and refresh error then emit Success with isOffline true`() = runTest {
+        val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val dailyData = listOf(
+            DailyPollen(date = "2023-05-01", readings = listOf(reading)),
+            DailyPollen(date = "2023-05-02", readings = listOf(reading)),
+            DailyPollen(date = "2023-05-03", readings = listOf(reading)),
+            DailyPollen(date = "2023-05-04", readings = listOf(reading))
+        )
+        fakeRepository.days.value = dailyData
+        fakeRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+        userPreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = ForecastViewModel(getMyPollen, clock)
+
+        viewModel.uiState.test {
+            assertEquals(ForecastUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val firstSuccess = awaitItem() as ForecastUiState.Success
+            assertFalse(firstSuccess.isOffline)
+            val secondSuccess = awaitItem() as ForecastUiState.Success
+            assertTrue(secondSuccess.isOffline)
+            assertEquals(4, secondSuccess.days.size)
         }
     }
 }

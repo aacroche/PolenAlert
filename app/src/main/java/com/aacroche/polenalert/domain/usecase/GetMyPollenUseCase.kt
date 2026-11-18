@@ -9,19 +9,26 @@ import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 
 sealed interface MyPollenResult {
     val name: String
 
     data class NoAllergiesSelected(override val name: String) : MyPollenResult
-    data class Data(override val name: String, val days: List<DailyPollen>) : MyPollenResult
+    data class Data(
+        override val name: String,
+        val days: List<DailyPollen>,
+        val isOffline: Boolean
+    ) : MyPollenResult
+
     data class Error(override val name: String, val error: DataError) : MyPollenResult
+    data object Loading : MyPollenResult {
+        override val name: String = ""
+    }
 }
 
-const val LATITUDE = 40.42
-const val LONGITUDE = -3.70
+const val LATITUDE = 46.0037
+const val LONGITUDE = 8.9511
 
 class GetMyPollenUseCase @Inject constructor(
     private val pollenRepository: PollenRepository,
@@ -29,23 +36,30 @@ class GetMyPollenUseCase @Inject constructor(
 ) {
 
 
-    operator fun invoke(): Flow<MyPollenResult> = flow {
-        val refresh = pollenRepository.refresh(LATITUDE, LONGITUDE)
-        emitAll(
-            combine(
-                pollenRepository.observeDailyPollen(),
-                preferencesRepository.preferences
-            ) { result, prefs ->
-                when {
-                    refresh is DataResult.Error -> MyPollenResult.Error(prefs.name, refresh.error) //first dataResult from api error
-                    prefs.allergies.isEmpty() -> MyPollenResult.NoAllergiesSelected(prefs.name)
-                    else -> MyPollenResult.Data(
-                        prefs.name,
-                        result.filteredByAllergies(prefs.allergies)
-                    )
-                }
+    operator fun invoke(): Flow<MyPollenResult> {
+        val refreshState: Flow<DataResult<Unit>?> = flow {
+            emit(null)                                            // null = refrescando
+            emit(pollenRepository.refresh(LATITUDE, LONGITUDE))
+        }
+        return combine(
+            pollenRepository.observeDailyPollen(),
+            preferencesRepository.preferences,
+            refreshState
+        ) { result, prefs, refresh ->
+            when {
+                result.isEmpty() && refresh == null -> MyPollenResult.Loading
+                result.isEmpty() && refresh is DataResult.Error -> MyPollenResult.Error(
+                    prefs.name,
+                    refresh.error
+                ) //first dataResult from api error
+                prefs.allergies.isEmpty() -> MyPollenResult.NoAllergiesSelected(prefs.name)
+                else -> MyPollenResult.Data(
+                    name = prefs.name,
+                    days = result.filteredByAllergies(prefs.allergies),
+                    isOffline = refresh is DataResult.Error
+                )
             }
-        )
+        }
     }
 }
 

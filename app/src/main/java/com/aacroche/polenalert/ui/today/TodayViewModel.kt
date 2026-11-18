@@ -6,6 +6,8 @@ import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.dominantReading
 import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
 import com.aacroche.polenalert.domain.usecase.MyPollenResult
+import com.aacroche.polenalert.ui.today.TodayUiState.NoAllergies
+import com.aacroche.polenalert.ui.today.TodayUiState.Success
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,14 +58,15 @@ class TodayViewModel @Inject constructor(
                 val now = LocalDateTime.now(clock)
                 val format = DateTimeFormatter.ofPattern("HH:mm")
 
-                TodayUiState.Success(
+                Success(
                     today = visibleToday,
                     nextDays = this.days.drop(1),
                     date = now.toLocalDate(),
                     greeting = greetingFor(now.hour),
                     updatedAt = now.format(format),
                     dominant = dominant,
-                    name = this.name
+                    name = this.name,
+                    isOffline = this.isOffline
                 )
             }
         }
@@ -74,11 +77,13 @@ class TodayViewModel @Inject constructor(
 
         is MyPollenResult.NoAllergiesSelected -> {
             val now = LocalDateTime.now(clock)
-            TodayUiState.NoAllergies(
+            NoAllergies(
                 date = now.toLocalDate(),
                 greeting = greetingFor(now.hour),
                 name = this.name
             )
         }
+
+        MyPollenResult.Loading -> TodayUiState.Loading
     }
 }

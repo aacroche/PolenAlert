@@ -11,10 +11,12 @@ import com.aacroche.polenalert.domain.model.UserPreferences
 import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -40,7 +42,7 @@ class GetMyPollenUseCaseTest {
     @Test
     fun `refresh error has priority over no allergies`() = runTest {
         fakePollenRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
-        assertTrue(getMyPollenUseCase().first() is MyPollenResult.Error)
+        assertTrue(getMyPollenUseCase().first { it !is MyPollenResult.Loading } is MyPollenResult.Error)
     }
 
     @Test
@@ -182,6 +184,63 @@ class GetMyPollenUseCaseTest {
                 assertEquals(1, day.readings.size)
                 assertEquals(PollenType.OLIVE, day.readings.first().type)
             }
+        }
+    }
+
+    @Test
+    fun `cache is visible before network completes`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading))
+        fakePollenRepository.days.value = listOf(dailyPollen)
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+        fakePollenRepository.refreshGate = CompletableDeferred()
+
+        getMyPollenUseCase().test {
+            val item = awaitItem() as MyPollenResult.Data
+            assertEquals("Test", item.name)
+            assertFalse(item.isOffline)
+        }
+    }
+
+    @Test
+    fun `cache with error emits data with isOffline true`() = runTest {
+        val oliveReading = PollenReading(type = PollenType.OLIVE, dailyMean = 30.0, level = PollenLevel.MEDIUM)
+        val dailyPollen = DailyPollen(date = "2026-10-27", readings = listOf(oliveReading))
+        fakePollenRepository.days.value = listOf(dailyPollen)
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+        fakePollenRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+        fakePollenRepository.refreshGate = CompletableDeferred()
+
+        getMyPollenUseCase().test {
+            assertFalse((awaitItem() as MyPollenResult.Data).isOffline)   // caché mientras refresca
+            fakePollenRepository.refreshGate!!.complete(Unit)
+            assertTrue((awaitItem() as MyPollenResult.Data).isOffline)    // falla la red → aviso
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `no cache with error emits error`() = runTest {
+        fakePollenRepository.days.value = emptyList()
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+        fakePollenRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+
+        getMyPollenUseCase().test {
+            val item = awaitItem() as MyPollenResult.Error
+            assertEquals("Test", item.name)
+            assertEquals(DataError.NO_CONNECTION, item.error)
+        }
+    }
+
+    @Test
+    fun `no cache and refreshing emits loading`() = runTest {
+        fakePollenRepository.days.value = emptyList()
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+        fakePollenRepository.refreshGate = CompletableDeferred()
+
+        getMyPollenUseCase().test {
+            val item = awaitItem()
+            assertEquals(MyPollenResult.Loading, item)
         }
     }
 }

@@ -25,6 +25,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +51,11 @@ import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.Trend
 import com.aacroche.polenalert.ui.components.ChooseAllergiesCard
+import com.aacroche.polenalert.ui.components.LoadingScreen
+import com.aacroche.polenalert.ui.components.MessageScreen
+import com.aacroche.polenalert.ui.components.MessageScreenWithTwoButtons
 import com.aacroche.polenalert.ui.components.ScreenGreeting
+import com.aacroche.polenalert.ui.components.TodayHeader
 import com.aacroche.polenalert.ui.theme.Inter
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
 import com.aacroche.polenalert.ui.theme.colors
@@ -56,9 +63,6 @@ import com.aacroche.polenalert.ui.theme.getImg
 import com.aacroche.polenalert.ui.theme.labelRes
 import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
-import com.aacroche.polenalert.ui.today.LoadingScreen
-import com.aacroche.polenalert.ui.today.MessageScreen
-import com.aacroche.polenalert.ui.today.TodayHeader
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -79,10 +83,22 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
         Box(modifier = Modifier.weight(1f)) {
             when (state) {
                 is ForecastUiState.Success -> {
-                    ForecastContent(
-                        days = state.days,
-                        forecasts = state.forecasts
-                    )
+                    var isDismissed by rememberSaveable(state.isOffline) { mutableStateOf(false) }
+                    if (state.isOffline && !isDismissed) {
+                        MessageScreenWithTwoButtons(
+                            title = stringResource(R.string.offline_title),
+                            body = stringResource(R.string.offline_message),
+                            actionText = stringResource(R.string.offline_text_button),
+                            actionText2 = stringResource(R.string.retry_connection),
+                            onDismiss = { isDismissed = true },
+                            onAction = onRetry
+                        )
+                    } else {
+                        ForecastContent(
+                            days = state.days,
+                            forecasts = state.forecasts
+                        )
+                    }
                 }
 
                 ForecastUiState.Loading -> {
@@ -438,7 +454,8 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                             ),
                             trend = Trend.STABLE
                         )
-                    )
+                    ),
+                    isOffline = false
                 ),
                 onRetry = {},
                 onOpenProfile = {}
