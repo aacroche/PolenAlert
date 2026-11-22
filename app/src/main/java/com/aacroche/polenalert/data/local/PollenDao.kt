@@ -1,10 +1,10 @@
 package com.aacroche.polenalert.data.local
 
 import androidx.room.Dao
+import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
-import androidx.room.Query
 import java.time.LocalDate
 
 @Dao
@@ -23,4 +23,7 @@ interface PollenDao {
         deleteOlderThan(today)
         upsertAll(rows)
     }
+
+    @Query("SELECT MIN(fetchedAt) FROM pollen_daily WHERE date >= :from")
+    suspend fun oldestFetchedAt(from: LocalDate): Long?
 }

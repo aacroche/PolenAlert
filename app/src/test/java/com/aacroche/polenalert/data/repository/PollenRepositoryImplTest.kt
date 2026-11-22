@@ -62,6 +62,10 @@ class PollenRepositoryImplTest {
             deleteOlderThan(today)
             upsertAll(rows)
         }
+
+        override suspend fun oldestFetchedAt(from: LocalDate): Long? {
+            return insertedRows.filter { !it.date.isBefore(from) }.minOfOrNull { it.fetchedAt.toEpochMilli() }
+        }
     }
 
     private val fixedClock: Clock = Clock.fixed(
