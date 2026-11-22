@@ -10,6 +10,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import java.time.Instant
 
 sealed interface MyPollenResult {
     val name: String
@@ -18,7 +19,9 @@ sealed interface MyPollenResult {
     data class Data(
         override val name: String,
         val days: List<DailyPollen>,
-        val isOffline: Boolean
+        val isOffline: Boolean,
+        val fetchedAt: Instant? = null,
+        val isRefreshing: Boolean = false
     ) : MyPollenResult
 
     data class Error(override val name: String, val error: DataError) : MyPollenResult
@@ -36,7 +39,7 @@ class GetMyPollenUseCase @Inject constructor(
 ) {
 
 
-    operator fun invoke(force : Boolean = false): Flow<MyPollenResult> {
+    operator fun invoke(force: Boolean = false): Flow<MyPollenResult> {
         val refreshState: Flow<DataResult<Unit>?> = flow {
             emit(null) // refreshing
             emit(pollenRepository.refresh(LATITUDE, LONGITUDE, force))
@@ -45,19 +48,22 @@ class GetMyPollenUseCase @Inject constructor(
             pollenRepository.observeDailyPollen(),
             preferencesRepository.preferences,
             refreshState
-        ) { result, prefs, refresh ->
+        ) { snapshot, prefs, refresh ->
+            val days = snapshot.days
             when {
 
-                (result.isEmpty()) && refresh == null -> MyPollenResult.Loading
-                result.isEmpty() && refresh is DataResult.Error -> MyPollenResult.Error(
+                (days.isEmpty()) && refresh == null -> MyPollenResult.Loading
+                days.isEmpty() && refresh is DataResult.Error -> MyPollenResult.Error(
                     prefs.name,
                     refresh.error
                 ) //first dataResult from api error
                 prefs.allergies.isEmpty() -> MyPollenResult.NoAllergiesSelected(prefs.name)
                 else -> MyPollenResult.Data(
                     name = prefs.name,
-                    days = result.filteredByAllergies(prefs.allergies),
-                    isOffline = refresh is DataResult.Error
+                    days = days.filteredByAllergies(prefs.allergies),
+                    isOffline = refresh is DataResult.Error,
+                    fetchedAt = snapshot.fetchedAt,
+                    isRefreshing = refresh == null
                 )
             }
         }

@@ -1,13 +1,13 @@
 package com.aacroche.polenalert.data.repository
 
 import com.aacroche.polenalert.data.local.PollenDao
-import com.aacroche.polenalert.data.local.mappers.toDomain
 import com.aacroche.polenalert.data.local.mappers.toEntities
+import com.aacroche.polenalert.data.local.mappers.toSnapshot
 import com.aacroche.polenalert.data.remote.PollenApi
 import com.aacroche.polenalert.data.remote.mapper.AirQualityMapper.toDomain
-import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
+import com.aacroche.polenalert.domain.model.PollenSnapshot
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -33,10 +33,10 @@ class PollenRepositoryImpl @Inject constructor(
         val MAX_CACHE_AGE: Duration = Duration.ofHours(1)
     }
 
-    override fun observeDailyPollen(): Flow<List<DailyPollen>> =
+    override fun observeDailyPollen(): Flow<PollenSnapshot> =
         pollenDao.observeFrom(LocalDate.now(clock))
             .map {
-                it.toDomain()
+                it.toSnapshot()
             }
 
 

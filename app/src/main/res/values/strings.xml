@@ -45,6 +45,7 @@
     <string name="today_date">HOY · %1$s</string>
     <string name="section_title">Tus pólenes</string>
     <string name="updated_at">Actualizado %1$s</string>
+    <string name="offline_saved_note">Datos del %1$s · hace unas %2$d h. No son niveles actuales.</string>
 
     <!-- Risk card -->
     <string name="risk_title">Polen predominante: %1$s</string>

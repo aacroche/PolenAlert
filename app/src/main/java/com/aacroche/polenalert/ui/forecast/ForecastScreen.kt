@@ -64,7 +64,9 @@ import com.aacroche.polenalert.ui.theme.labelRes
 import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun ForecastDestination(viewModel: ForecastViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
@@ -96,7 +98,9 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                     } else {
                         ForecastContent(
                             days = state.days,
-                            forecasts = state.forecasts
+                            forecasts = state.forecasts,
+                            isOffline = state.isOffline,
+                            savedAt = state.savedAt
                         )
                     }
                 }
@@ -158,6 +162,8 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
     fun ForecastContent(
         days: List<LocalDate>,
         forecasts: List<PollenForecast>,
+        isOffline: Boolean,
+        savedAt: LocalDateTime?,
         modifier: Modifier = Modifier
     ) {
         LazyColumn(
@@ -173,7 +179,7 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
             }
 
             item {
-                ForecastSectionTitle()
+                ForecastSectionTitle(isOffline = isOffline, savedAt = savedAt)
             }
 
             item {
@@ -210,9 +216,13 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
     }
 
     @Composable
-    fun ForecastSectionTitle() {
+    fun ForecastSectionTitle(
+        isOffline: Boolean,
+        savedAt: LocalDateTime? = null,
+        modifier: Modifier = Modifier
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -221,11 +231,16 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = stringResource(R.string.forecast_levels_header),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (!isOffline) {
+                savedAt?.let {
+                    val time = savedAt.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+                    Text(
+                        text = stringResource(R.string.updated_at, time),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 
@@ -455,7 +470,8 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                             trend = Trend.STABLE
                         )
                     ),
-                    isOffline = false
+                    isOffline = false,
+                    savedAt = LocalDateTime.now()
                 ),
                 onRetry = {},
                 onOpenProfile = {}

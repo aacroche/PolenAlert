@@ -51,10 +51,12 @@ class ForecastViewModel @Inject constructor(
                 if (forecasts.isEmpty()) {
                     ForecastUiState.Empty
                 } else {
+                    val savedAt = this.fetchedAt?.atZone(clock.zone)?.toLocalDateTime()
                     Success(
                         days = days,
                         forecasts = forecasts,
-                        isOffline = this.isOffline
+                        isOffline = this.isOffline,
+                        savedAt = savedAt
                     )
                 }
             }

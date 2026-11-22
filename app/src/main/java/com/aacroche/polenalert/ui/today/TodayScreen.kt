@@ -23,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -58,6 +60,10 @@ import com.aacroche.polenalert.ui.theme.getImg
 import com.aacroche.polenalert.ui.theme.labelRes
 import com.aacroche.polenalert.ui.theme.nameRes
 import com.aacroche.polenalert.ui.theme.scientificName
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+
 
 @Composable
 fun TodayDestination(viewModel: TodayViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
@@ -88,22 +94,52 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                             onAction = onRetry
                         )
                     } else {
-                        LazyColumn(
+                        PullToRefreshBox(
+                            isRefreshing = state.isRefreshing,
+                            onRefresh = onRetry,
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(
-                                horizontal = 20.dp,
-                                vertical = 12.dp
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            item { ScreenGreeting(state.date, state.greeting, state.name) }
-                            item { RiskHeroCard(state.dominant,  state.isOffline) }
-                            item { SectionTitle(state.updatedAt, state.isOffline) }
-                            items(
-                                items = state.today.readings,
-                                key = { it.type }
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(
+                                    horizontal = 20.dp,
+                                    vertical = 12.dp
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                PollenCard(it)
+                                item { ScreenGreeting(state.date, state.greeting, state.name) }
+                                item { RiskHeroCard(state.dominant, state.isOffline) }
+                                item {
+                                    SectionTitle(
+                                        state.isOffline,
+                                        state.savedAt
+                                    )
+                                }
+                                items(
+                                    items = state.today.readings,
+                                    key = { it.type }
+                                ) {
+                                    PollenCard(it)
+                                }
+                                item {
+                                    if (state.isOffline && state.savedAt != null && state.savedHoursAgo != null) {
+                                        val date = state.savedAt.format(
+                                            DateTimeFormatter.ofPattern(
+                                                "d MMM",
+                                                LocalLocale.current.platformLocale
+                                            )
+                                        )
+                                        Text(
+                                            text = stringResource(
+                                                R.string.offline_saved_note,
+                                                date,
+                                                state.savedHoursAgo
+                                            ),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -163,7 +199,11 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
 }
 
 @Composable
-fun RiskHeroCard(dominant: PollenReading, isOffline: Boolean = false, modifier: Modifier = Modifier) {
+fun RiskHeroCard(
+    dominant: PollenReading,
+    isOffline: Boolean = false,
+    modifier: Modifier = Modifier
+) {
     val (levelContent, _) = dominant.level.colors()
     val onCard = MaterialTheme.colorScheme.onPrimary
 
@@ -193,7 +233,9 @@ fun RiskHeroCard(dominant: PollenReading, isOffline: Boolean = false, modifier: 
                             .background(levelContent, CircleShape)
                     )
                     Text(
-                        text = if (isOffline) stringResource(R.string.offline_risk_data) else stringResource(dominant.level.dominantRisk()),
+                        text = if (isOffline) stringResource(R.string.offline_risk_data) else stringResource(
+                            dominant.level.dominantRisk()
+                        ),
                         style = MaterialTheme.typography.labelMedium,
                         color = onCard
                     )
@@ -243,7 +285,11 @@ private fun RiskHeroCardPreview() {
 }
 
 @Composable
-fun SectionTitle(updatedAt: String, isOffline: Boolean, modifier: Modifier = Modifier) {
+fun SectionTitle(
+    isOffline: Boolean,
+    savedAt: LocalDateTime? = null,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -255,12 +301,15 @@ fun SectionTitle(updatedAt: String, isOffline: Boolean, modifier: Modifier = Mod
             stringResource(R.string.section_title),
             style = MaterialTheme.typography.titleMedium
         )
-        if(!isOffline) {
-            Text(
-                text = stringResource(R.string.updated_at, updatedAt),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        if (!isOffline) {
+            savedAt?.let {
+                val time = savedAt.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+                Text(
+                    text = stringResource(R.string.updated_at, time),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
