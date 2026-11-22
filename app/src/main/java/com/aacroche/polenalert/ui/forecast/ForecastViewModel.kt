@@ -27,17 +27,17 @@ class ForecastViewModel @Inject constructor(
     private val clock: Clock
 ) : ViewModel() {
 
-    private val retryTrigger = MutableSharedFlow<Unit>(replay = 1).apply { tryEmit(Unit) }
+    private val retryTrigger = MutableSharedFlow<Boolean>(replay = 1).apply { tryEmit(false) }
 
     val uiState: StateFlow<ForecastUiState> = retryTrigger
-        .flatMapLatest {
-            getMyPollen()
+        .flatMapLatest { force ->
+            getMyPollen(force)
                 .map { it.toUiState() }
                 .onStart { emit(ForecastUiState.Loading) }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ForecastUiState.Loading)
 
     fun retry() {
-        retryTrigger.tryEmit(Unit)
+        retryTrigger.tryEmit(true)
     }
 
     private fun MyPollenResult.toUiState(): ForecastUiState = when (this) {
@@ -61,6 +61,7 @@ class ForecastViewModel @Inject constructor(
                 }
             }
         }
+
         is MyPollenResult.Error -> {
             ForecastUiState.Error(this.error)
         }
