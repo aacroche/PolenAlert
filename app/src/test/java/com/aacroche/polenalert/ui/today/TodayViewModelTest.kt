@@ -274,4 +274,22 @@ class TodayViewModelTest {
         }
     }
 
+    @Test
+    fun `when repository returns data with fetchedAt 30 minutes ago then emit Success with savedHoursAgo 0`() = runTest {
+        val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val today = DailyPollen(date = "2026-10-27", readings = listOf(reading))
+        fakeRepository.days.value = listOf(today)
+        fakeRepository.fetchedAt.value = Instant.parse("2026-10-27T07:00:00Z")
+        fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = TodayViewModel(getMyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val success = awaitItem() as TodayUiState.Success
+            assertEquals(0L, success.savedHoursAgo)
+        }
+    }
+
 }

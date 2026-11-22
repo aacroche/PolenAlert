@@ -1,10 +1,15 @@
 package com.aacroche.polenalert.data.local.mappers
 
+import com.aacroche.polenalert.data.local.PollenDailyEntity
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Instant
+import java.time.LocalDate
 
 class PollenEntityMapperTest {
 
@@ -31,5 +36,25 @@ class PollenEntityMapperTest {
         val result = original.toEntities(java.time.Instant.EPOCH).toDomain()
 
         assertEquals(original, result)
+    }
+
+    @Test
+    fun `toSnapshot uses the oldest fetchedAt`() {
+        val older = Instant.parse("2026-11-22T08:00:00Z")
+        val newer = Instant.parse("2026-11-22T09:00:00Z")
+        val rows = listOf(
+            PollenDailyEntity(LocalDate.of(2026, 11, 22), PollenType.GRASS, 10.0, newer),
+            PollenDailyEntity(LocalDate.of(2026, 11, 22), PollenType.OLIVE, 20.0, older),
+        )
+
+        assertEquals(older, rows.toSnapshot().fetchedAt)
+    }
+
+    @Test
+    fun `toSnapshot of empty list has null fetchedAt`() {
+        val snapshot = emptyList<PollenDailyEntity>().toSnapshot()
+
+        assertTrue(snapshot.days.isEmpty())
+        assertNull(snapshot.fetchedAt)
     }
 }
