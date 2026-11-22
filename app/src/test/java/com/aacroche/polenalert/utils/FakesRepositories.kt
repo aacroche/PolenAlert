@@ -2,6 +2,7 @@ package com.aacroche.polenalert.utils
 
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataResult
+import com.aacroche.polenalert.domain.model.PollenSnapshot
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
 import com.aacroche.polenalert.domain.repository.PollenRepository
@@ -9,9 +10,12 @@ import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import java.time.Instant
 
 class FakePollenRepository : PollenRepository {
     val days = MutableStateFlow<List<DailyPollen>>(emptyList())
+    val fetchedAt = MutableStateFlow<Instant?>(null)
     var refreshResult: DataResult<Unit> = DataResult.Success(Unit)
     var refreshGate: CompletableDeferred<Unit>? = null
     var calls = 0
@@ -30,11 +34,14 @@ class FakePollenRepository : PollenRepository {
                 is DataResult.Error -> {
                     refreshResult = DataResult.Error(value.error)
                     days.value = emptyList()
+                    fetchedAt.value = null
                 }
             }
         }
 
-    override fun observeDailyPollen() = days
+    override fun observeDailyPollen(): Flow<PollenSnapshot> =
+        combine(days, fetchedAt) { d, f -> PollenSnapshot(d, f) }
+
     override suspend fun refresh(latitude: Double, longitude: Double, force: Boolean): DataResult<Unit> {
         calls++
         refreshGate?.await()

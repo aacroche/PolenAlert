@@ -12,6 +12,7 @@ import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
 import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -24,6 +25,7 @@ import org.junit.Test
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -131,7 +133,7 @@ class ForecastViewModelTest {
     }
 
     @Test
-    fun `when retry after error then emit Loading then Success`() = runTest {
+    fun `when retry after error then emit Success`() = runTest {
         userPreferencesRepository.setAllergy(PollenType.GRASS, true)
         fakeRepository.result = DataResult.Error(DataError.NO_CONNECTION)
 
@@ -154,9 +156,31 @@ class ForecastViewModelTest {
             viewModel.retry()
             advanceUntilIdle()
 
-            assertEquals(ForecastUiState.Loading, awaitItem())
             val success = awaitItem() as ForecastUiState.Success
             assertEquals(4, success.days.size)
+        }
+    }
+
+    @Test
+    fun `when repository returns data with fetchedAt then emit Success with savedAt`() = runTest {
+        val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val dailyData = listOf(
+            DailyPollen(date = "2023-05-01", readings = listOf(reading)),
+            DailyPollen(date = "2023-05-02", readings = listOf(reading)),
+            DailyPollen(date = "2023-05-03", readings = listOf(reading)),
+            DailyPollen(date = "2023-05-04", readings = listOf(reading))
+        )
+        fakeRepository.days.value = dailyData
+        fakeRepository.fetchedAt.value = Instant.parse("2026-10-27T06:00:00Z")
+        userPreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = ForecastViewModel(getMyPollen, clock)
+
+        viewModel.uiState.test {
+            assertEquals(ForecastUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val success = awaitItem() as ForecastUiState.Success
+            assertEquals(LocalDateTime.of(2026, 10, 27, 7, 0), success.savedAt)
         }
     }
 
@@ -195,18 +219,20 @@ class ForecastViewModelTest {
         )
         fakeRepository.days.value = dailyData
         fakeRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+        fakeRepository.refreshGate = CompletableDeferred()
         userPreferencesRepository.setAllergy(PollenType.GRASS, true)
 
         val viewModel = ForecastViewModel(getMyPollen, clock)
 
         viewModel.uiState.test {
             assertEquals(ForecastUiState.Loading, awaitItem())
-            advanceUntilIdle()
             val firstSuccess = awaitItem() as ForecastUiState.Success
             assertFalse(firstSuccess.isOffline)
+            fakeRepository.refreshGate!!.complete(Unit)
             val secondSuccess = awaitItem() as ForecastUiState.Success
             assertTrue(secondSuccess.isOffline)
             assertEquals(4, secondSuccess.days.size)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }
