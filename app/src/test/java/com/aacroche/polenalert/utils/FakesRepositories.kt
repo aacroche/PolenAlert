@@ -35,7 +35,7 @@ class FakePollenRepository : PollenRepository {
         }
 
     override fun observeDailyPollen() = days
-    override suspend fun refresh(latitude: Double, longitude: Double): DataResult<Unit> {
+    override suspend fun refresh(latitude: Double, longitude: Double, force: Boolean): DataResult<Unit> {
         calls++
         refreshGate?.await()
         return refreshResult
