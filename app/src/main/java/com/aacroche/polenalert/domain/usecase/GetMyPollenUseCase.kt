@@ -36,10 +36,10 @@ class GetMyPollenUseCase @Inject constructor(
 ) {
 
 
-    operator fun invoke(): Flow<MyPollenResult> {
+    operator fun invoke(force : Boolean = false): Flow<MyPollenResult> {
         val refreshState: Flow<DataResult<Unit>?> = flow {
-            emit(null)                                            // null = refrescando
-            emit(pollenRepository.refresh(LATITUDE, LONGITUDE))
+            emit(null) // refreshing
+            emit(pollenRepository.refresh(LATITUDE, LONGITUDE, force))
         }
         return combine(
             pollenRepository.observeDailyPollen(),
@@ -47,7 +47,8 @@ class GetMyPollenUseCase @Inject constructor(
             refreshState
         ) { result, prefs, refresh ->
             when {
-                result.isEmpty() && refresh == null -> MyPollenResult.Loading
+
+                (result.isEmpty()) && refresh == null -> MyPollenResult.Loading
                 result.isEmpty() && refresh is DataResult.Error -> MyPollenResult.Error(
                     prefs.name,
                     refresh.error

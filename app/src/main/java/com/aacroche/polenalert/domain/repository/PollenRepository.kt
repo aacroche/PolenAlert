@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface PollenRepository {
     fun observeDailyPollen(): Flow<List<DailyPollen>>
-    suspend fun refresh(latitude: Double, longitude: Double): DataResult<Unit>
+    suspend fun refresh(latitude: Double, longitude: Double, force: Boolean = false) : DataResult<Unit>
 }
