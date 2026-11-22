@@ -54,6 +54,7 @@ import com.aacroche.polenalert.ui.components.ChooseAllergiesCard
 import com.aacroche.polenalert.ui.components.LoadingScreen
 import com.aacroche.polenalert.ui.components.MessageScreen
 import com.aacroche.polenalert.ui.components.MessageScreenWithTwoButtons
+import com.aacroche.polenalert.ui.components.OfflineSavedNote
 import com.aacroche.polenalert.ui.components.ScreenGreeting
 import com.aacroche.polenalert.ui.components.TodayHeader
 import com.aacroche.polenalert.ui.theme.Inter
@@ -100,7 +101,8 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                             days = state.days,
                             forecasts = state.forecasts,
                             isOffline = state.isOffline,
-                            savedAt = state.savedAt
+                            savedAt = state.savedAt,
+                            savedHoursAgo = state.savedHoursAgo
                         )
                     }
                 }
@@ -164,6 +166,7 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
         forecasts: List<PollenForecast>,
         isOffline: Boolean,
         savedAt: LocalDateTime?,
+        savedHoursAgo: Long?,
         modifier: Modifier = Modifier
     ) {
         LazyColumn(
@@ -195,6 +198,15 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
 
             item {
                 ForecastLegend()
+            }
+
+            item {
+                if (isOffline && savedAt != null && savedHoursAgo != null) {
+                    OfflineSavedNote(
+                        savedAt = savedAt,
+                        savedHoursAgo = savedHoursAgo
+                    )
+                }
             }
         }
     }

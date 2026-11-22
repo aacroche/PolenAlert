@@ -12,7 +12,8 @@ sealed interface ForecastUiState {
         val days: List<LocalDate>,
         val forecasts: List<PollenForecast>,
         val isOffline: Boolean,
-        val savedAt: LocalDateTime?
+        val savedAt: LocalDateTime?,
+        val savedHoursAgo: Long? = null
     ) : ForecastUiState
     data object Empty : ForecastUiState
     data class Error(val error: DataError) : ForecastUiState

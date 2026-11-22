@@ -51,6 +51,7 @@ import com.aacroche.polenalert.ui.components.ChooseAllergiesCard
 import com.aacroche.polenalert.ui.components.LoadingScreen
 import com.aacroche.polenalert.ui.components.MessageScreen
 import com.aacroche.polenalert.ui.components.MessageScreenWithTwoButtons
+import com.aacroche.polenalert.ui.components.OfflineSavedNote
 import com.aacroche.polenalert.ui.components.ScreenGreeting
 import com.aacroche.polenalert.ui.components.TodayHeader
 import com.aacroche.polenalert.ui.theme.PolenAlertTheme
@@ -123,20 +124,9 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                                 }
                                 item {
                                     if (state.isOffline && state.savedAt != null && state.savedHoursAgo != null) {
-                                        val date = state.savedAt.format(
-                                            DateTimeFormatter.ofPattern(
-                                                "d MMM",
-                                                LocalLocale.current.platformLocale
-                                            )
-                                        )
-                                        Text(
-                                            text = stringResource(
-                                                R.string.offline_saved_note,
-                                                date,
-                                                state.savedHoursAgo
-                                            ),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        OfflineSavedNote(
+                                            savedAt = state.savedAt,
+                                            savedHoursAgo = state.savedHoursAgo
                                         )
                                     }
                                 }
