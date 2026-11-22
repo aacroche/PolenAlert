@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.Clock
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -51,10 +52,14 @@ class ForecastViewModel @Inject constructor(
                 if (forecasts.isEmpty()) {
                     ForecastUiState.Empty
                 } else {
+                    val savedAt = this.fetchedAt?.atZone(clock.zone)?.toLocalDateTime()
+                    val savedHoursAgo = this.fetchedAt?.let { Duration.between(it, clock.instant()).toHours() }
                     Success(
                         days = days,
                         forecasts = forecasts,
-                        isOffline = this.isOffline
+                        isOffline = this.isOffline,
+                        savedAt = savedAt,
+                        savedHoursAgo = savedHoursAgo
                     )
                 }
             }

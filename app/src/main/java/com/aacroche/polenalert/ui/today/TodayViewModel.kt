@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.Clock
+import java.time.Duration
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,6 +43,7 @@ class TodayViewModel @Inject constructor(
 
     private fun MyPollenResult.toUiState(): TodayUiState = when (this) {
         is MyPollenResult.Data -> {
+
             val today = this.days.firstOrNull()
             val visibleReadings = today?.readings.orEmpty().filter {
                 it.level != PollenLevel.NONE
@@ -54,17 +55,20 @@ class TodayViewModel @Inject constructor(
                 TodayUiState.OutOfSeason
             } else {
                 val now = LocalDateTime.now(clock)
-                val format = DateTimeFormatter.ofPattern("HH:mm")
+                val savedAt = this.fetchedAt?.atZone(clock.zone)?.toLocalDateTime()
+                val savedHoursAgo = this.fetchedAt?.let { Duration.between(it, clock.instant()).toHours() }
 
                 Success(
                     today = visibleToday,
                     nextDays = this.days.drop(1),
                     date = now.toLocalDate(),
                     greeting = greetingFor(now.hour),
-                    updatedAt = now.format(format),
                     dominant = dominant,
                     name = this.name,
-                    isOffline = this.isOffline
+                    isOffline = this.isOffline,
+                    savedAt = savedAt,
+                    savedHoursAgo = savedHoursAgo,
+                    isRefreshing = this.isRefreshing
                 )
             }
         }

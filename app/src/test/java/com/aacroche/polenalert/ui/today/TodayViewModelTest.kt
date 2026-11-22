@@ -12,6 +12,7 @@ import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
 import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -24,6 +25,7 @@ import org.junit.Test
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -96,7 +98,7 @@ class TodayViewModelTest {
     }
 
     @Test
-    fun `when retry after error then emit Loading then Success`() = runTest {
+    fun `when retry after error then emit Success`() = runTest {
         fakeRepository.result = DataResult.Error(DataError.NO_CONNECTION)
         fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
 
@@ -114,7 +116,6 @@ class TodayViewModelTest {
             viewModel.retry()
             advanceUntilIdle()
 
-            assertEquals(TodayUiState.Loading, awaitItem())
             val success = awaitItem() as TodayUiState.Success
             assertEquals(today, success.today)
         }
@@ -209,7 +210,25 @@ class TodayViewModelTest {
             val success = awaitItem() as TodayUiState.Success
             assertEquals(R.string.greeting_morning, success.greeting)
             assertEquals(LocalDate.of(2026, 10, 27), success.date)
-            assertEquals("08:30", success.updatedAt)
+            assertEquals(null, success.savedAt)
+        }
+    }
+
+    @Test
+    fun `when repository returns data with fetchedAt then emit Success with savedAt`() = runTest {
+        val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val today = DailyPollen(date = "2026-10-27", readings = listOf(reading))
+        fakeRepository.days.value = listOf(today)
+        fakeRepository.fetchedAt.value = Instant.parse("2026-10-27T06:00:00Z")
+        fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = TodayViewModel(getMyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val success = awaitItem() as TodayUiState.Success
+            assertEquals(LocalDateTime.of(2026, 10, 27, 7, 0), success.savedAt)
         }
     }
 
@@ -238,6 +257,29 @@ class TodayViewModelTest {
         val today = DailyPollen(date = "2023-05-01", readings = listOf(reading))
         fakeRepository.days.value = listOf(today)
         fakeRepository.refreshResult = DataResult.Error(DataError.NO_CONNECTION)
+        fakeRepository.refreshGate = CompletableDeferred()
+        fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = TodayViewModel(getMyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            val firstSuccess = awaitItem() as TodayUiState.Success
+            assertFalse(firstSuccess.isOffline)
+            fakeRepository.refreshGate!!.complete(Unit)
+            val secondSuccess = awaitItem() as TodayUiState.Success
+            assertTrue(secondSuccess.isOffline)
+            assertEquals(today, secondSuccess.today)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `when repository returns data with fetchedAt 30 minutes ago then emit Success with savedHoursAgo 0`() = runTest {
+        val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val today = DailyPollen(date = "2026-10-27", readings = listOf(reading))
+        fakeRepository.days.value = listOf(today)
+        fakeRepository.fetchedAt.value = Instant.parse("2026-10-27T07:00:00Z")
         fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
 
         val viewModel = TodayViewModel(getMyPollenUseCase, clock)
@@ -245,11 +287,8 @@ class TodayViewModelTest {
         viewModel.uiState.test {
             assertEquals(TodayUiState.Loading, awaitItem())
             advanceUntilIdle()
-            val firstSuccess = awaitItem() as TodayUiState.Success
-            assertFalse(firstSuccess.isOffline)
-            val secondSuccess = awaitItem() as TodayUiState.Success
-            assertTrue(secondSuccess.isOffline)
-            assertEquals(today, secondSuccess.today)
+            val success = awaitItem() as TodayUiState.Success
+            assertEquals(0L, success.savedHoursAgo)
         }
     }
 

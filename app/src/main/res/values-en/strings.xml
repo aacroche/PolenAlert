@@ -44,6 +44,8 @@
     <string name="today_date">TODAY · %1$s</string>
     <string name="section_title">Your pollens</string>
     <string name="updated_at">Updated %1$s</string>
+    <string name="offline_saved_note">Data from %1$s · about %2$d h ago. Not current levels.</string>
+    <string name="offline_saved_note_recent">Data from %1$s · less than 1 h ago. Not current levels.</string>
 
     <!-- Risk card -->
     <string name="risk_low_today">RISK LOW TODAY</string>

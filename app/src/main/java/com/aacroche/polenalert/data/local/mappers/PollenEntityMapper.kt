@@ -3,6 +3,7 @@ package com.aacroche.polenalert.data.local.mappers
 import com.aacroche.polenalert.data.local.PollenDailyEntity
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.PollenReading
+import com.aacroche.polenalert.domain.model.PollenSnapshot
 import java.time.Instant
 import java.time.LocalDate
 
@@ -31,3 +32,6 @@ fun List<PollenDailyEntity>.toDomain(): List<DailyPollen> =
             },
         )
     }
+
+fun List<PollenDailyEntity>.toSnapshot(): PollenSnapshot =
+    PollenSnapshot(days = toDomain(), fetchedAt = minOfOrNull { it.fetchedAt })
