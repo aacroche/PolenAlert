@@ -3,15 +3,17 @@ package com.aacroche.polenalert.data.local.mappers
 import com.aacroche.polenalert.data.local.PollenDailyEntity
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.PollenReading
+import java.time.Instant
 import java.time.LocalDate
 
-fun List<DailyPollen>.toEntities(): List<PollenDailyEntity> =
+fun List<DailyPollen>.toEntities(fetchedAt: Instant): List<PollenDailyEntity> =
     flatMap { day ->
         day.readings.map {
             PollenDailyEntity(
                 LocalDate.parse(day.date),
                 it.type,
-                it.dailyMean
+                it.dailyMean,
+                fetchedAt
             )
         }
     }

@@ -28,7 +28,7 @@ class PollenEntityMapperTest {
             )
         )
 
-        val result = original.toEntities().toDomain()
+        val result = original.toEntities(java.time.Instant.EPOCH).toDomain()
 
         assertEquals(original, result)
     }
