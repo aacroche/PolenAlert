@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import java.time.Clock
 import java.time.LocalDateTime
@@ -36,7 +35,6 @@ class TodayViewModel @Inject constructor(
         .flatMapLatest { force ->
             getMyPollen(force)
                 .map { it.toUiState() }
-                .onStart { emit(TodayUiState.Loading) }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState.Loading)
 
     fun retry() {
