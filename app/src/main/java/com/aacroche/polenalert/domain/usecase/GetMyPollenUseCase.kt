@@ -47,7 +47,8 @@ class GetMyPollenUseCase @Inject constructor(
             refreshState
         ) { result, prefs, refresh ->
             when {
-                result.isEmpty() && refresh == null -> MyPollenResult.Loading
+
+                (result.isEmpty() || force) && refresh == null -> MyPollenResult.Loading
                 result.isEmpty() && refresh is DataResult.Error -> MyPollenResult.Error(
                     prefs.name,
                     refresh.error
