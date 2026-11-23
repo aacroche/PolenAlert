@@ -28,7 +28,6 @@ class ForecastViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val retryTrigger = MutableSharedFlow<Boolean>(replay = 1).apply { tryEmit(false) }
-    private val now = LocalDateTime.now(clock)
 
     val uiState: StateFlow<ForecastUiState> = retryTrigger
         .flatMapLatest { force ->
@@ -76,7 +75,7 @@ class ForecastViewModel @Inject constructor(
         }
 
         is MyPollenResult.NoAllergiesSelected -> {
-
+            val now = LocalDateTime.now(clock)
             NoAllergies(
                 date = now.toLocalDate(),
                 greeting = greetingFor(now.hour),
@@ -86,11 +85,14 @@ class ForecastViewModel @Inject constructor(
 
         MyPollenResult.Loading -> ForecastUiState.Loading
 
-        is MyPollenResult.LocationPermissionRequired -> ForecastUiState.NoLocation(
-            date = now.toLocalDate(),
-            greeting = greetingFor(now.hour),
-            name = this.name
-        )
+        is MyPollenResult.LocationPermissionRequired -> {
+            val now = LocalDateTime.now(clock)
+            ForecastUiState.NoLocation(
+                date = now.toLocalDate(),
+                greeting = greetingFor(now.hour),
+                name = this.name
+            )
+        }
     }
 
     private companion object {

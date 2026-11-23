@@ -31,8 +31,8 @@ sealed interface MyPollenResult {
     data class LocationPermissionRequired(override val name: String)  : MyPollenResult
 }
 
-const val LATITUDE = 46.0037
-const val LONGITUDE = 8.9511
+const val LATITUDE = 40.42
+const val LONGITUDE = -3.70
 
 class GetMyPollenUseCase @Inject constructor(
     private val pollenRepository: PollenRepository,
