@@ -79,4 +79,8 @@
     <string name="offline_message">Showing the last saved data. \nIt may have changed and doesn’t reflect current pollen levels.</string>
     <string name="offline_text_button">See saved data</string>
     <string name="offline_risk_data">SAVED DATA · NOT UPDATED</string>
+    <string name="location_permission_title">Consulta el polen cerca de ti</string>
+    <string name="location_description">Permite el acceso a tu ubicación para ver los datos de tu zona. Si prefieres, elige una ubicación manualmente</string>
+    <string name="location_permission_text_button">Permitir ubicación</string>
+    <string name="location_manual_text_button">Elegir ubicación manualmente</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.aacroche.polenalert.ui.forecast
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aacroche.polenalert.R
 import com.aacroche.polenalert.domain.model.DataError
@@ -72,11 +75,21 @@ import java.time.format.FormatStyle
 @Composable
 fun ForecastDestination(viewModel: ForecastViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    ForecastScreen(state = state, onRetry = viewModel::retry, onOpenProfile = onOpenProfile)
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onLocationPermissionChange()
+        onPauseOrDispose { }
+    }
+
+    ForecastScreen(state = state, onRetry = viewModel::retry, onOpenProfile = onOpenProfile, onLocationPermission = viewModel::onLocationPermissionChange)
 }
 
 @Composable
-fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: () -> Unit) {
+fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: () -> Unit, onLocationPermission: () -> Unit) {
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ -> onLocationPermission() }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -93,8 +106,8 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                             body = stringResource(R.string.offline_message),
                             actionText = stringResource(R.string.offline_text_button),
                             actionText2 = stringResource(R.string.retry_connection),
-                            onDismiss = { isDismissed = true },
-                            onAction = onRetry
+                            onAction1 = { isDismissed = true },
+                            onAction2 = onRetry
                         )
                     } else {
                         ForecastContent(
@@ -154,6 +167,17 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                         item { ScreenGreeting(state.date, state.greeting, state.name) }
                         item { ChooseAllergiesCard(onOpenProfile) }
                     }
+                }
+
+                is ForecastUiState.NoLocation -> {
+                    MessageScreenWithTwoButtons(
+                        title = stringResource(R.string.location_permission_title),
+                        body = stringResource(R.string.location_description),
+                        actionText = stringResource(R.string.location_permission_text_button),
+                        actionText2 = stringResource(R.string.location_manual_text_button),
+                        onAction1 = {permissionLauncher.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)},
+                        onAction2 = {}
+                    )
                 }
             }
         }
@@ -486,7 +510,8 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                     savedAt = LocalDateTime.now()
                 ),
                 onRetry = {},
-                onOpenProfile = {}
+                onOpenProfile = {},
+                onLocationPermission = {}
             )
         }
     }

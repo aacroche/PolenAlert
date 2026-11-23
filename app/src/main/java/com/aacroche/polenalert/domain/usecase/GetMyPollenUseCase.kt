@@ -4,12 +4,14 @@ import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.model.PollenType
+import com.aacroche.polenalert.domain.repository.LocationRepository
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.time.Instant
 
 sealed interface MyPollenResult {
@@ -25,9 +27,8 @@ sealed interface MyPollenResult {
     ) : MyPollenResult
 
     data class Error(override val name: String, val error: DataError) : MyPollenResult
-    data object Loading : MyPollenResult {
-        override val name: String = ""
-    }
+    data object Loading : MyPollenResult {override val name: String = "" }
+    data class LocationPermissionRequired(override val name: String)  : MyPollenResult
 }
 
 const val LATITUDE = 46.0037
@@ -36,6 +37,7 @@ const val LONGITUDE = 8.9511
 class GetMyPollenUseCase @Inject constructor(
     private val pollenRepository: PollenRepository,
     private val preferencesRepository: UserPreferencesRepository,
+    private val locationRepository: LocationRepository
 ) {
 
 
@@ -44,6 +46,11 @@ class GetMyPollenUseCase @Inject constructor(
             emit(null) // refreshing
             emit(pollenRepository.refresh(LATITUDE, LONGITUDE, force))
         }
+        if(!locationRepository.hasLocationPermission()) {
+            return preferencesRepository.preferences.map {
+                MyPollenResult.LocationPermissionRequired(it.name)
+            }
+        }
         return combine(
             pollenRepository.observeDailyPollen(),
             preferencesRepository.preferences,
@@ -51,12 +58,11 @@ class GetMyPollenUseCase @Inject constructor(
         ) { snapshot, prefs, refresh ->
             val days = snapshot.days
             when {
-
                 (days.isEmpty()) && refresh == null -> MyPollenResult.Loading
                 days.isEmpty() && refresh is DataResult.Error -> MyPollenResult.Error(
                     prefs.name,
                     refresh.error
-                ) //first dataResult from api error
+                )
                 prefs.allergies.isEmpty() -> MyPollenResult.NoAllergiesSelected(prefs.name)
                 else -> MyPollenResult.Data(
                     name = prefs.name,

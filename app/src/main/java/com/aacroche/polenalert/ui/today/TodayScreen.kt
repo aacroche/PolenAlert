@@ -1,5 +1,7 @@
 package com.aacroche.polenalert.ui.today
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,13 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aacroche.polenalert.R
 import com.aacroche.polenalert.domain.model.DataError
@@ -67,13 +69,23 @@ import java.time.format.FormatStyle
 
 
 @Composable
-fun TodayDestination(viewModel: TodayViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
+fun TodayDestination(viewModel: TodayViewModel = hiltViewModel(), onOpenProfile: () -> Unit, ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    TodayScreen(state = state, onRetry = viewModel::retry, onOpenProfile = onOpenProfile)
+    LifecycleResumeEffect(Unit) {
+        viewModel.onLocationPermissionChange()
+        onPauseOrDispose { }
+    }
+
+    TodayScreen(state = state, onRetry = viewModel::retry, onOpenProfile = onOpenProfile, onLocationPermissionChanged = viewModel::onLocationPermissionChange)
 }
 
+
+
 @Composable
-fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> Unit) {
+fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> Unit, onLocationPermissionChanged: () -> Unit) {
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { _ -> onLocationPermissionChanged() }
 
     Column(
         Modifier
@@ -91,8 +103,8 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                             body = stringResource(R.string.offline_message),
                             actionText = stringResource(R.string.offline_text_button),
                             actionText2 = stringResource(R.string.retry_connection),
-                            onDismiss = { isDismissed = true },
-                            onAction = onRetry
+                            onAction1 = { isDismissed = true },
+                            onAction2 = onRetry
                         )
                     } else {
                         PullToRefreshBox(
@@ -182,6 +194,17 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                         item { ScreenGreeting(state.date, state.greeting, state.name) }
                         item { ChooseAllergiesCard(onOpenProfile) }
                     }
+                }
+
+                is TodayUiState.NoLocation -> {
+                    MessageScreenWithTwoButtons(
+                        title = stringResource(R.string.location_permission_title),
+                        body = stringResource(R.string.location_description),
+                        actionText = stringResource(R.string.location_permission_text_button),
+                        actionText2 = stringResource(R.string.location_manual_text_button),
+                        onAction1 = {permissionLauncher.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)},
+                        onAction2 = {}
+                    )
                 }
             }
         }
