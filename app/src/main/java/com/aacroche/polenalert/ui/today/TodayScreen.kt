@@ -160,6 +160,15 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                     )
                 }
 
+                TodayUiState.OutOfCoverage -> {
+                    MessageScreen(
+                        title = stringResource(R.string.out_of_coverage),
+                        body = "",
+                        actionText = null,
+                        onAction = {}
+                    )
+                }
+
                 is TodayUiState.Error -> {
                     val (errorTitle, errorBody) = when (state.error) {
                         DataError.NO_CONNECTION -> stringResource(R.string.error_connection_title) to stringResource(

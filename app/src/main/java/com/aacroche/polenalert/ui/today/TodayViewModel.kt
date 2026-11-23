@@ -97,5 +97,9 @@ class TodayViewModel @Inject constructor(
             val now = LocalDateTime.now(clock)
             TodayUiState.NoLocation(now.toLocalDate(), greetingFor(now.hour), this.name)
         }
+
+        is MyPollenResult.LocationUnavailable -> TodayUiState.Error(com.aacroche.polenalert.domain.model.DataError.UNKNOWN)
+
+        is MyPollenResult.OutOfCoverage -> TodayUiState.OutOfCoverage
     }
 }

@@ -17,6 +17,7 @@ sealed interface ForecastUiState {
     ) : ForecastUiState
 
     data object Empty : ForecastUiState
+    data object OutOfCoverage : ForecastUiState
     data class Error(val error: DataError) : ForecastUiState
     data class NoAllergies(val date: LocalDate, @StringRes val greeting: Int, val name: String) :
         ForecastUiState

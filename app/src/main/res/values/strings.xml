@@ -7,6 +7,7 @@
 
     <!-- UI States -->
     <string name="out_of_season">Fuera de temporada de polen</string>
+    <string name="out_of_coverage">PolenAlert solo tiene datos de polen de Europa</string>
 
     <!-- Errors -->
     <string name="error_connection_title">Error de conexión</string>

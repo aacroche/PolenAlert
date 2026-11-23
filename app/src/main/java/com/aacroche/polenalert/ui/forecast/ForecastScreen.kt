@@ -133,6 +133,15 @@ fun ForecastScreen(state: ForecastUiState, onRetry: () -> Unit, onOpenProfile: (
                     )
                 }
 
+                ForecastUiState.OutOfCoverage -> {
+                    MessageScreen(
+                        title = stringResource(R.string.out_of_coverage),
+                        body = "",
+                        actionText = null,
+                        onAction = {}
+                    )
+                }
+
                 is ForecastUiState.Error -> {
                     val (errorTitle, errorBody) = when (state.error) {
                         DataError.NO_CONNECTION -> stringResource(R.string.error_connection_title) to stringResource(

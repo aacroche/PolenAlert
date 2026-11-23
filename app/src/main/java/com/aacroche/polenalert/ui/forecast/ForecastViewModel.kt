@@ -10,6 +10,7 @@ import com.aacroche.polenalert.ui.forecast.ForecastUiState.Success
 import com.aacroche.polenalert.ui.today.greetingFor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ForecastViewModel @Inject constructor(
     private val getMyPollen: GetMyPollenUseCase,
@@ -93,6 +95,10 @@ class ForecastViewModel @Inject constructor(
                 name = this.name
             )
         }
+
+        is MyPollenResult.LocationUnavailable -> ForecastUiState.Error(com.aacroche.polenalert.domain.model.DataError.UNKNOWN)
+
+        is MyPollenResult.OutOfCoverage -> ForecastUiState.OutOfCoverage
     }
 
     private companion object {
