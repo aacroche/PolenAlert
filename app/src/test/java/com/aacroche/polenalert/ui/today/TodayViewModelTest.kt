@@ -9,6 +9,7 @@ import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
+import com.aacroche.polenalert.utils.FakeLocationRepository
 import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
@@ -36,6 +37,7 @@ class TodayViewModelTest {
 
     private lateinit var fakeRepository: FakePollenRepository
     private lateinit var fakePreferencesRepository: FakeUserPreferencesRepository
+    private lateinit var fakeLocationRepository: FakeLocationRepository
     private lateinit var getMyPollenUseCase: GetMyPollenUseCase
     private val clock = Clock.fixed(
         Instant.parse("2026-10-27T07:30:00Z"),
@@ -46,7 +48,12 @@ class TodayViewModelTest {
     fun setUp() {
         fakeRepository = FakePollenRepository()
         fakePreferencesRepository = FakeUserPreferencesRepository()
-        getMyPollenUseCase = GetMyPollenUseCase(fakeRepository, fakePreferencesRepository)
+        fakeLocationRepository = FakeLocationRepository()
+        getMyPollenUseCase = GetMyPollenUseCase(
+            fakeRepository,
+            fakePreferencesRepository,
+            fakeLocationRepository
+        )
     }
 
     @Test
@@ -292,4 +299,45 @@ class TodayViewModelTest {
         }
     }
 
+    @Test
+    fun `when location permission is missing then emit NoLocation state`() = runTest {
+        fakeLocationRepository.hasPermission = false
+        fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = TodayViewModel(getMyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val noLocationState = awaitItem() as TodayUiState.NoLocation
+            assertEquals("", noLocationState.name)
+            assertEquals(LocalDate.of(2026, 10, 27), noLocationState.date)
+            assertEquals(R.string.greeting_morning, noLocationState.greeting)
+        }
+    }
+
+    @Test
+    fun `when location permission is granted and onLocationPermissionChange called then transition to Success`() = runTest {
+        fakeLocationRepository.hasPermission = false
+        val reading = PollenReading(type = PollenType.GRASS, dailyMean = 15.0, level = PollenLevel.LOW)
+        val today = DailyPollen(date = "2023-05-01", readings = listOf(reading))
+        fakeRepository.result = DataResult.Success(listOf(today))
+        fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = TodayViewModel(getMyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertTrue(awaitItem() is TodayUiState.NoLocation)
+
+            // Concede permiso y notifica al ViewModel
+            fakeLocationRepository.hasPermission = true
+            viewModel.onLocationPermissionChange()
+            advanceUntilIdle()
+
+            val successState = awaitItem() as TodayUiState.Success
+            assertEquals(today, successState.today)
+        }
+    }
 }

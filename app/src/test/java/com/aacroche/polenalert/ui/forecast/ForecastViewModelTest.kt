@@ -9,6 +9,7 @@ import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.usecase.GetMyPollenUseCase
+import com.aacroche.polenalert.utils.FakeLocationRepository
 import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
@@ -36,6 +37,7 @@ class ForecastViewModelTest {
 
     private lateinit var fakeRepository: FakePollenRepository
     private lateinit var userPreferencesRepository: FakeUserPreferencesRepository
+    private lateinit var fakeLocationRepository: FakeLocationRepository
     private lateinit var getMyPollen: GetMyPollenUseCase
 
     private val clock = Clock.fixed(
@@ -47,7 +49,12 @@ class ForecastViewModelTest {
     fun setUp() {
         fakeRepository = FakePollenRepository()
         userPreferencesRepository = FakeUserPreferencesRepository()
-        getMyPollen = GetMyPollenUseCase(fakeRepository, userPreferencesRepository)
+        fakeLocationRepository = FakeLocationRepository()
+        getMyPollen = GetMyPollenUseCase(
+            fakeRepository,
+            userPreferencesRepository,
+            fakeLocationRepository
+        )
     }
 
     @Test
