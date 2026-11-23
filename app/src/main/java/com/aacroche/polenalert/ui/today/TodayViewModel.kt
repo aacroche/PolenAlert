@@ -41,6 +41,10 @@ class TodayViewModel @Inject constructor(
         retryTrigger.tryEmit(true)
     }
 
+    fun onLocationPermissionChange() {
+        retryTrigger.tryEmit(false)
+    }
+
     private fun MyPollenResult.toUiState(): TodayUiState = when (this) {
         is MyPollenResult.Data -> {
 
@@ -56,7 +60,8 @@ class TodayViewModel @Inject constructor(
             } else {
                 val now = LocalDateTime.now(clock)
                 val savedAt = this.fetchedAt?.atZone(clock.zone)?.toLocalDateTime()
-                val savedHoursAgo = this.fetchedAt?.let { Duration.between(it, clock.instant()).toHours() }
+                val savedHoursAgo =
+                    this.fetchedAt?.let { Duration.between(it, clock.instant()).toHours() }
 
                 Success(
                     today = visibleToday,
@@ -87,5 +92,10 @@ class TodayViewModel @Inject constructor(
         }
 
         MyPollenResult.Loading -> TodayUiState.Loading
+
+        is MyPollenResult.LocationPermissionRequired -> {
+            val now = LocalDateTime.now(clock)
+            TodayUiState.NoLocation(now.toLocalDate(), greetingFor(now.hour), this.name)
+        }
     }
 }

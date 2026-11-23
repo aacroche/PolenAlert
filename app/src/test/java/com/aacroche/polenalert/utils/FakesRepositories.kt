@@ -5,6 +5,7 @@ import com.aacroche.polenalert.domain.model.DataResult
 import com.aacroche.polenalert.domain.model.PollenSnapshot
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
+import com.aacroche.polenalert.domain.repository.LocationRepository
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -66,4 +67,10 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
         if (enabled) currentAllergies.add(type) else currentAllergies.remove(type)
         _preferences.value = _preferences.value.copy(allergies = currentAllergies)
     }
+}
+
+class FakeLocationRepository(
+    var hasPermission: Boolean = true
+) : LocationRepository {
+    override fun hasLocationPermission(): Boolean = hasPermission
 }

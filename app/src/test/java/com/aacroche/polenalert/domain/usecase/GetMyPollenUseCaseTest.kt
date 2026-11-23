@@ -8,6 +8,7 @@ import com.aacroche.polenalert.domain.model.PollenLevel
 import com.aacroche.polenalert.domain.model.PollenReading
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
+import com.aacroche.polenalert.utils.FakeLocationRepository
 import com.aacroche.polenalert.utils.FakePollenRepository
 import com.aacroche.polenalert.utils.FakeUserPreferencesRepository
 import com.aacroche.polenalert.utils.MainDispatcherRule
@@ -30,13 +31,31 @@ class GetMyPollenUseCaseTest {
 
     private lateinit var fakePollenRepository: FakePollenRepository
     private lateinit var fakePreferencesRepository: FakeUserPreferencesRepository
+    private lateinit var fakeLocationRepository: FakeLocationRepository
     private lateinit var getMyPollenUseCase: GetMyPollenUseCase
 
     @Before
     fun setUp() {
         fakePollenRepository = FakePollenRepository()
         fakePreferencesRepository = FakeUserPreferencesRepository()
-        getMyPollenUseCase = GetMyPollenUseCase(fakePollenRepository, fakePreferencesRepository)
+        fakeLocationRepository = FakeLocationRepository()
+        getMyPollenUseCase = GetMyPollenUseCase(
+            fakePollenRepository,
+            fakePreferencesRepository,
+            fakeLocationRepository
+        )
+    }
+
+    @Test
+    fun `when location permission is missing then emit LocationPermissionRequired and pollenRepository calls is 0`() = runTest {
+        fakeLocationRepository.hasPermission = false
+        fakePreferencesRepository.setPreferences(UserPreferences(name = "Test", allergies = setOf(PollenType.OLIVE)))
+
+        getMyPollenUseCase().test {
+            val item = awaitItem() as MyPollenResult.LocationPermissionRequired
+            assertEquals("Test", item.name)
+            assertEquals(0, fakePollenRepository.calls)
+        }
     }
 
     @Test

@@ -39,6 +39,10 @@ class ForecastViewModel @Inject constructor(
         retryTrigger.tryEmit(true)
     }
 
+    fun onLocationPermissionChange() {
+        retryTrigger.tryEmit(false)
+    }
+
     private fun MyPollenResult.toUiState(): ForecastUiState = when (this) {
         is MyPollenResult.Data -> {
             if (this.days.size < REQUIRED_DAYS) {
@@ -53,7 +57,8 @@ class ForecastViewModel @Inject constructor(
                     ForecastUiState.Empty
                 } else {
                     val savedAt = this.fetchedAt?.atZone(clock.zone)?.toLocalDateTime()
-                    val savedHoursAgo = this.fetchedAt?.let { Duration.between(it, clock.instant()).toHours() }
+                    val savedHoursAgo =
+                        this.fetchedAt?.let { Duration.between(it, clock.instant()).toHours() }
                     Success(
                         days = days,
                         forecasts = forecasts,
@@ -79,11 +84,18 @@ class ForecastViewModel @Inject constructor(
         }
 
         MyPollenResult.Loading -> ForecastUiState.Loading
+
+        is MyPollenResult.LocationPermissionRequired -> {
+            val now = LocalDateTime.now(clock)
+            ForecastUiState.NoLocation(
+                date = now.toLocalDate(),
+                greeting = greetingFor(now.hour),
+                name = this.name
+            )
+        }
     }
 
     private companion object {
         const val REQUIRED_DAYS = 4
-        const val MADRID_LAT = 40.42
-        const val MADRID_LON = -3.70
     }
 }

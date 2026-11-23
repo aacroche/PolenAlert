@@ -74,8 +74,16 @@
     <string name="choose_allergies_title">Elige tus alergias</string>
     <string name="choose_allergies_subtitle">Así te mostraremos solo los pólenes que te afectan</string>
     <string name="go_to_profile">Ir a Perfil</string>
+
+    <!-- Offline -->
     <string name="offline_title">Tus últimos datos siguen aquí</string>
     <string name="offline_message">Mostramos los últimos datos guardados.\nPueden haber cambiado y no reflejan el polen actual.</string>
     <string name="offline_text_button">Ver datos guardados</string>
     <string name="offline_risk_data">DATOS GUARDADOS · NO ACTUALES</string>
+
+    <!-- Location -->
+    <string name="location_permission_title">Consulta el polen cerca de ti</string>
+    <string name="location_description">Permite el acceso a tu ubicación para ver los datos de tu zona. Si prefieres, elige una ubicación manualmente.</string>
+    <string name="location_permission_text_button">Permitir ubicación</string>
+    <string name="location_manual_text_button">Elegir ubicación manualmente</string>
 </resources>

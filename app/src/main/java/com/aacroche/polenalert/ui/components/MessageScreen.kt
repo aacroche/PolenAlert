@@ -63,8 +63,8 @@ fun MessageScreenWithTwoButtons(
     body: String,
     actionText: String,
     actionText2: String,
-    onDismiss: () -> Unit,
-    onAction: () -> Unit,
+    onAction1: () -> Unit,
+    onAction2: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -85,12 +85,12 @@ fun MessageScreenWithTwoButtons(
         if (actionText != null && actionText2 != null) {
             Spacer(Modifier.height(16.dp))
             Button(
-                onClick = onDismiss, colors = ButtonDefaults.buttonColors(
+                onClick = onAction1, colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) { Text(actionText) }
-            Button(onClick = onAction) { Text(actionText2) }
+            Button(onClick = onAction2) { Text(actionText2) }
         }
     }
 }
@@ -99,12 +99,12 @@ fun MessageScreenWithTwoButtons(
 @Composable
 private fun MessageScreenWithTwoButtonsPreview() {
     MessageScreenWithTwoButtons(
-        title = stringResource(R.string.offline_title),
-        body = stringResource(R.string.offline_message),
-        actionText = stringResource(R.string.offline_text_button),
-        actionText2 = stringResource(R.string.retry_connection),
-        onDismiss = {},
-        onAction = {}
+        title = stringResource(R.string.location_permission_title),
+        body = stringResource(R.string.location_description),
+        actionText = stringResource(R.string.location_permission_text_button),
+        actionText2 = stringResource(R.string.location_manual_text_button),
+        onAction1 = {},
+        onAction2 = {}
     )
 }
 
