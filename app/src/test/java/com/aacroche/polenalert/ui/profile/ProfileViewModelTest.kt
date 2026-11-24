@@ -1,6 +1,7 @@
 package com.aacroche.polenalert.ui.profile
 
 import app.cash.turbine.test
+import com.aacroche.polenalert.domain.model.Place
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
@@ -85,5 +86,9 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
             currentAllergies.remove(type)
         }
         _preferences.value = _preferences.value.copy(allergies = currentAllergies)
+    }
+
+    override suspend fun setManualPlace(place: Place?) {
+        _preferences.value = _preferences.value.copy(manualPlace = place)
     }
 }

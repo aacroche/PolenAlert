@@ -2,9 +2,11 @@ package com.aacroche.polenalert.utils
 
 import com.aacroche.polenalert.domain.model.DailyPollen
 import com.aacroche.polenalert.domain.model.DataResult
+import com.aacroche.polenalert.domain.model.Place
 import com.aacroche.polenalert.domain.model.PollenSnapshot
 import com.aacroche.polenalert.domain.model.PollenType
 import com.aacroche.polenalert.domain.model.UserPreferences
+import com.aacroche.polenalert.domain.repository.GeocodingRepository
 import com.aacroche.polenalert.domain.repository.LocationRepository
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
@@ -67,6 +69,10 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
         if (enabled) currentAllergies.add(type) else currentAllergies.remove(type)
         _preferences.value = _preferences.value.copy(allergies = currentAllergies)
     }
+
+    override suspend fun setManualPlace(place: com.aacroche.polenalert.domain.model.Place?) {
+        _preferences.value = _preferences.value.copy(manualPlace = place)
+    }
 }
 
 class FakeLocationRepository(
@@ -76,3 +82,16 @@ class FakeLocationRepository(
     override fun hasLocationPermission(): Boolean = hasPermission
     override suspend fun getCurrentLocation(): com.aacroche.polenalert.domain.model.Coordinates? = location
 }
+
+class FakeGeocodingRepository : GeocodingRepository {
+    var calls = 0
+    var lastQuery: String? = null
+    var result: DataResult<List<Place>> = DataResult.Success(emptyList())
+
+    override suspend fun search(query: String, language: String): DataResult<List<Place>> {
+        calls++
+        lastQuery = query
+        return result
+    }
+}
+
