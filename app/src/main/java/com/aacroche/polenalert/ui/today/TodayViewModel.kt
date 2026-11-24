@@ -97,5 +97,13 @@ class TodayViewModel @Inject constructor(
             val now = LocalDateTime.now(clock)
             TodayUiState.NoLocation(now.toLocalDate(), greetingFor(now.hour), this.name)
         }
+
+        is MyPollenResult.LocationUnavailable -> TodayUiState.LocationUnavailable
+
+        is MyPollenResult.OutOfCoverage -> TodayUiState.OutOfCoverage
+    }
+
+    fun onResume() {
+        if (uiState.value is TodayUiState.NoLocation) retryTrigger.tryEmit(false)
     }
 }

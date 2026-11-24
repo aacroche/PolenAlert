@@ -70,7 +70,9 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
 }
 
 class FakeLocationRepository(
-    var hasPermission: Boolean = true
+    var hasPermission: Boolean = true,
+    var location: com.aacroche.polenalert.domain.model.Coordinates? = com.aacroche.polenalert.domain.model.Coordinates(40.4168, -3.7038)
 ) : LocationRepository {
     override fun hasLocationPermission(): Boolean = hasPermission
+    override suspend fun getCurrentLocation(): com.aacroche.polenalert.domain.model.Coordinates? = location
 }

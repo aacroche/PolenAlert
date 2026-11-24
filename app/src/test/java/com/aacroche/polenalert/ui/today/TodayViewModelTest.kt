@@ -340,4 +340,18 @@ class TodayViewModelTest {
             assertEquals(today, successState.today)
         }
     }
+
+    @Test
+    fun `when location is out of coverage then emit OutOfCoverage state`() = runTest {
+        fakeLocationRepository.location = com.aacroche.polenalert.domain.model.Coordinates(0.0, 0.0)
+        fakePreferencesRepository.setAllergy(PollenType.GRASS, true)
+
+        val viewModel = TodayViewModel(getMyPollenUseCase, clock)
+
+        viewModel.uiState.test {
+            assertEquals(TodayUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertEquals(TodayUiState.OutOfCoverage, awaitItem())
+        }
+    }
 }

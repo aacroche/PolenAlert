@@ -1,5 +1,6 @@
 package com.aacroche.polenalert.ui.today
 
+import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -72,7 +73,7 @@ import java.time.format.FormatStyle
 fun TodayDestination(viewModel: TodayViewModel = hiltViewModel(), onOpenProfile: () -> Unit, ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LifecycleResumeEffect(Unit) {
-        viewModel.onLocationPermissionChange()
+        viewModel.onResume()
         onPauseOrDispose { }
     }
 
@@ -160,6 +161,15 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                     )
                 }
 
+                TodayUiState.OutOfCoverage -> {
+                    MessageScreen(
+                        title = stringResource(R.string.out_of_coverage),
+                        body = "",
+                        actionText = null,
+                        onAction = {}
+                    )
+                }
+
                 is TodayUiState.Error -> {
                     val (errorTitle, errorBody) = when (state.error) {
                         DataError.NO_CONNECTION -> stringResource(R.string.error_connection_title) to stringResource(
@@ -201,9 +211,18 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                         title = stringResource(R.string.location_permission_title),
                         body = stringResource(R.string.location_description),
                         actionText = stringResource(R.string.location_permission_text_button),
-                        actionText2 = stringResource(R.string.location_manual_text_button),
-                        onAction1 = {permissionLauncher.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)},
+                        actionText2 = stringResource(R.string.location_manual_text_button), // TODO 4.4: búsqueda manual de ciudad
+                        onAction1 = {permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)},
                         onAction2 = {}
+                    )
+                }
+
+                TodayUiState.LocationUnavailable -> {
+                    MessageScreen(
+                        title = stringResource(R.string.location_unavailable),
+                        body = "",
+                        actionText = null,
+                        onAction = {}
                     )
                 }
             }

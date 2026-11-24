@@ -7,6 +7,7 @@
     <!-- UI States -->
     <string name="retry_connection">Retry connection</string>
     <string name="out_of_season">Out of pollen season</string>
+    <string name="out_of_coverage">PolenAlert only has pollen data for Europe</string>
 
     <!-- Errors -->
     <string name="error_connection_title">Connection Error</string>
@@ -87,4 +88,5 @@
     <string name="location_description">Allow access to your location to see data for your area. If you prefer, choose a location manually.</string>
     <string name="location_permission_text_button">Allow location</string>
     <string name="location_manual_text_button">Choose location manually</string>
+    <string name="location_unavailable">Localización no disponible</string>
 </resources>

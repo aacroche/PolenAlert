@@ -22,6 +22,8 @@ sealed interface TodayUiState {
         val isRefreshing: Boolean,
     ) : TodayUiState
     data object OutOfSeason : TodayUiState
+    data object OutOfCoverage : TodayUiState
+    data object LocationUnavailable : TodayUiState
     data class NoLocation(
         val date: LocalDate,
         @StringRes val greeting: Int,

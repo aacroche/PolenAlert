@@ -7,6 +7,7 @@
 
     <!-- UI States -->
     <string name="out_of_season">Fuera de temporada de polen</string>
+    <string name="out_of_coverage">PolenAlert solo tiene datos de polen de Europa</string>
 
     <!-- Errors -->
     <string name="error_connection_title">Error de conexión</string>
@@ -86,4 +87,5 @@
     <string name="location_description">Permite el acceso a tu ubicación para ver los datos de tu zona. Si prefieres, elige una ubicación manualmente.</string>
     <string name="location_permission_text_button">Permitir ubicación</string>
     <string name="location_manual_text_button">Elegir ubicación manualmente</string>
+    <string name="location_unavailable">Localización no disponible</string>
 </resources>
