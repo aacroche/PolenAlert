@@ -18,7 +18,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.aacroche.polenalert.ui.forecast.ForecastDestination
+import com.aacroche.polenalert.ui.location.LocationSearchDestination
 import com.aacroche.polenalert.ui.navigation.ForecastRoute
+import com.aacroche.polenalert.ui.navigation.LocationSearchRoute
 import com.aacroche.polenalert.ui.navigation.ProfileRoute
 import com.aacroche.polenalert.ui.navigation.TodayRoute
 import com.aacroche.polenalert.ui.navigation.TopLevelDestination
@@ -33,6 +35,9 @@ fun PolenAlertAppContent() {
         backStack.retainAll { it == TodayRoute }
         backStack.add(ProfileRoute)
     }
+
+    val searchLocation: () -> Unit = { backStack.add(LocationSearchRoute) }
+
     Scaffold(
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
@@ -75,9 +80,10 @@ fun PolenAlertAppContent() {
                 rememberViewModelStoreNavEntryDecorator()
             ),
             entryProvider = entryProvider {
-                entry<TodayRoute> { TodayDestination(onOpenProfile = openProfile)}
+                entry<TodayRoute> { TodayDestination(onOpenProfile = openProfile, onSearchLocation = searchLocation)}
                 entry<ForecastRoute> { ForecastDestination(onOpenProfile =  openProfile) }
                 entry<ProfileRoute> { ProfileDestination() }
+                entry<LocationSearchRoute> { LocationSearchDestination(onBack = { backStack.removeLastOrNull() }) }
             }
         )
     }

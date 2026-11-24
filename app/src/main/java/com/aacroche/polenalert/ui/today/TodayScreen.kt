@@ -70,20 +70,36 @@ import java.time.format.FormatStyle
 
 
 @Composable
-fun TodayDestination(viewModel: TodayViewModel = hiltViewModel(), onOpenProfile: () -> Unit, ) {
+fun TodayDestination(
+    viewModel: TodayViewModel = hiltViewModel(),
+    onOpenProfile: () -> Unit,
+    onSearchLocation: () -> Unit) {
+
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
     LifecycleResumeEffect(Unit) {
         viewModel.onResume()
         onPauseOrDispose { }
     }
 
-    TodayScreen(state = state, onRetry = viewModel::retry, onOpenProfile = onOpenProfile, onLocationPermissionChanged = viewModel::onLocationPermissionChange)
+    TodayScreen(
+        state = state,
+        onRetry = viewModel::retry,
+        onOpenProfile = onOpenProfile,
+        onLocationPermissionChanged = viewModel::onLocationPermissionChange,
+        onSearchLocation = onSearchLocation
+    )
 }
 
 
-
 @Composable
-fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> Unit, onLocationPermissionChanged: () -> Unit) {
+fun TodayScreen(
+    state: TodayUiState,
+    onRetry: () -> Unit,
+    onOpenProfile: () -> Unit,
+    onLocationPermissionChanged: () -> Unit,
+    onSearchLocation: () -> Unit,
+) {
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ -> onLocationPermissionChanged() }
@@ -162,11 +178,11 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                 }
 
                 TodayUiState.OutOfCoverage -> {
-                    MessageScreen(
+                    MessageScreen (
                         title = stringResource(R.string.out_of_coverage),
                         body = "",
-                        actionText = null,
-                        onAction = {}
+                        actionText = stringResource(R.string.location_manual_text_button),
+                        onAction = onSearchLocation
                     )
                 }
 
@@ -211,9 +227,9 @@ fun TodayScreen(state: TodayUiState, onRetry: () -> Unit, onOpenProfile: () -> U
                         title = stringResource(R.string.location_permission_title),
                         body = stringResource(R.string.location_description),
                         actionText = stringResource(R.string.location_permission_text_button),
-                        actionText2 = stringResource(R.string.location_manual_text_button), // TODO 4.4: búsqueda manual de ciudad
-                        onAction1 = {permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)},
-                        onAction2 = {}
+                        actionText2 = stringResource(R.string.location_manual_text_button),
+                        onAction1 = { permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) },
+                        onAction2 = onSearchLocation
                     )
                 }
 
