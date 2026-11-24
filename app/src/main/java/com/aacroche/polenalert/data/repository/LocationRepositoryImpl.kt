@@ -22,8 +22,14 @@ class LocationRepositoryImpl @Inject constructor(@ApplicationContext private val
     override suspend fun getCurrentLocation(): Coordinates? {
         if (!hasLocationPermission()) return null
         val client = LocationServices.getFusedLocationProviderClient(context)
-        val location = client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null).await()
-            ?: client.lastLocation.await()
-        return location?.let { Coordinates(it.latitude, it.longitude) }
+
+        val location =
+            client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null).await()
+                ?: client.lastLocation.await()
+                ?: client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
+        return location?.let {
+            Coordinates(it.latitude, it.longitude)
+            //Log.d("PolenAlert", "coordinates= ${it.latitud} ${it.longitude}}")
+        }
     }
 }

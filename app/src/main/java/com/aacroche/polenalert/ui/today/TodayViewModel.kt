@@ -98,8 +98,12 @@ class TodayViewModel @Inject constructor(
             TodayUiState.NoLocation(now.toLocalDate(), greetingFor(now.hour), this.name)
         }
 
-        is MyPollenResult.LocationUnavailable -> TodayUiState.Error(com.aacroche.polenalert.domain.model.DataError.UNKNOWN)
+        is MyPollenResult.LocationUnavailable -> TodayUiState.LocationUnavailable
 
         is MyPollenResult.OutOfCoverage -> TodayUiState.OutOfCoverage
+    }
+
+    fun onResume() {
+        if (uiState.value is TodayUiState.NoLocation) retryTrigger.tryEmit(false)
     }
 }

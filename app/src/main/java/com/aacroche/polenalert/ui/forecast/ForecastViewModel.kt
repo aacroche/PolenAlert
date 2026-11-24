@@ -96,7 +96,7 @@ class ForecastViewModel @Inject constructor(
             )
         }
 
-        is MyPollenResult.LocationUnavailable -> ForecastUiState.Error(com.aacroche.polenalert.domain.model.DataError.UNKNOWN)
+        is MyPollenResult.LocationUnavailable -> ForecastUiState.LocationUnavailable
 
         is MyPollenResult.OutOfCoverage -> ForecastUiState.OutOfCoverage
     }
