@@ -88,4 +88,14 @@
     <string name="location_permission_text_button">Permitir ubicación</string>
     <string name="location_manual_text_button">Elegir ubicación manualmente</string>
     <string name="location_unavailable">Localización no disponible</string>
+    <string name="location_search_title">Elegir ubicación</string>
+    <string name="location_search_hint">Busca una ciudad</string>
+    <string name="location_use_current">Usar mi ubicación actual</string>
+    <string name="location_search_min_chars">Escribe al menos 2 letras.</string>
+    <string name="location_search_no_results">No hemos encontrado «%1$s».</string>
+    <string name="location_search_error_connection">No se ha podido buscar. Comprueba tu conexión.</string>
+    <string name="location_search_error">No se ha podido buscar. Inténtalo de nuevo.</string>
+    <string name="back">Volver</string>
+    <string name="clear">Borrar</string>
+
 </resources>

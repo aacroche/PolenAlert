@@ -1,8 +1,10 @@
 package com.aacroche.polenalert.di
 
 import com.aacroche.polenalert.data.preferences.UserPreferencesRepositoryImpl
+import com.aacroche.polenalert.data.repository.GeocodingRepositoryImpl
 import com.aacroche.polenalert.data.repository.LocationRepositoryImpl
 import com.aacroche.polenalert.data.repository.PollenRepositoryImpl
+import com.aacroche.polenalert.domain.repository.GeocodingRepository
 import com.aacroche.polenalert.domain.repository.LocationRepository
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
@@ -18,6 +20,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPollenRepository(pollenRepository: PollenRepositoryImpl): PollenRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGeocodingRepository(geocodingRepository: GeocodingRepositoryImpl): GeocodingRepository
 
     @Binds
     @Singleton

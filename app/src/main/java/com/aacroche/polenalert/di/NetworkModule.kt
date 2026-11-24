@@ -1,5 +1,6 @@
 package com.aacroche.polenalert.di
 
+import com.aacroche.polenalert.data.remote.GeocodingApi
 import com.aacroche.polenalert.data.remote.PollenApi
 import dagger.Module
 import dagger.Provides
@@ -18,15 +19,31 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 object NetworkModule {
     @Provides
     @Singleton
-    fun providePollenApi(retrofit: Retrofit): PollenApi {
+    fun providePollenApi(@AirQualityRetrofit retrofit: Retrofit): PollenApi {
         return retrofit.create(PollenApi::class.java)
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit {
+    fun provideGeocodingApi(@GeocodingRetrofit retrofit: Retrofit): GeocodingApi {
+        return retrofit.create(GeocodingApi::class.java)
+    }
+
+    @Provides
+    @Singleton @AirQualityRetrofit
+    fun provideAirQualityRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit {
         return Retrofit.Builder()
             .baseUrl(PollenApi.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @Singleton @GeocodingRetrofit
+    fun provideGeocodingRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(GeocodingApi.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()

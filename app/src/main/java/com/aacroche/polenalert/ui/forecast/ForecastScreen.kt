@@ -74,7 +74,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @Composable
-fun ForecastDestination(viewModel: ForecastViewModel = hiltViewModel(), onOpenProfile: () -> Unit) {
+fun ForecastDestination(viewModel: ForecastViewModel = hiltViewModel(), onOpenProfile: () -> Unit, onSearchLocation: () -> Unit) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LifecycleResumeEffect(Unit) {
@@ -86,7 +86,8 @@ fun ForecastDestination(viewModel: ForecastViewModel = hiltViewModel(), onOpenPr
         state = state,
         onRetry = viewModel::retry,
         onOpenProfile = onOpenProfile,
-        onLocationPermission = viewModel::onLocationPermissionChange
+        onLocationPermission = viewModel::onLocationPermissionChange,
+        onSearchLocation = onSearchLocation
     )
 }
 
@@ -95,7 +96,8 @@ fun ForecastScreen(
     state: ForecastUiState,
     onRetry: () -> Unit,
     onOpenProfile: () -> Unit,
-    onLocationPermission: () -> Unit
+    onLocationPermission: () -> Unit,
+    onSearchLocation: () -> Unit
 ) {
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -148,8 +150,8 @@ fun ForecastScreen(
                     MessageScreen(
                         title = stringResource(R.string.out_of_coverage),
                         body = "",
-                        actionText = null,
-                        onAction = {}
+                        actionText = stringResource(R.string.location_manual_text_button),
+                        onAction = onSearchLocation
                     )
                 }
 
@@ -196,7 +198,7 @@ fun ForecastScreen(
                         actionText = stringResource(R.string.location_permission_text_button),
                         actionText2 = stringResource(R.string.location_manual_text_button),
                         onAction1 = { permissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) },
-                        onAction2 = {}
+                        onAction2 = onSearchLocation
                     )
                 }
 
@@ -540,7 +542,8 @@ private fun ForecastScreenPreview() {
             ),
             onRetry = {},
             onOpenProfile = {},
-            onLocationPermission = {}
+            onLocationPermission = {},
+            onSearchLocation = {}
         )
     }
 }

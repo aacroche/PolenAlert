@@ -10,9 +10,12 @@ import com.aacroche.polenalert.domain.repository.LocationRepository
 import com.aacroche.polenalert.domain.repository.PollenRepository
 import com.aacroche.polenalert.domain.repository.UserPreferencesRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.time.Instant
@@ -43,7 +46,21 @@ class GetMyPollenUseCase @Inject constructor(
     private val locationRepository: LocationRepository,
 ) {
 
-    operator fun invoke(force: Boolean = false): Flow<MyPollenResult> = flow {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    operator fun invoke(force: Boolean = false): Flow<MyPollenResult> =
+        preferencesRepository.preferences
+            .map { it.manualPlace }
+            .distinctUntilChanged()
+            .flatMapLatest { manualPlace ->
+                if (manualPlace != null) placePollen(manualPlace.coordinates, force)
+                else gpsPollen(force)
+            }
+
+    private fun placePollen(coordinates: Coordinates, force: Boolean): Flow<MyPollenResult> =
+        if (coordinates.isInPollenCoverage()) pollenFor(coordinates, force)
+        else preferencesRepository.preferences.map { MyPollenResult.OutOfCoverage(it.name) }
+
+    private fun gpsPollen(force: Boolean): Flow<MyPollenResult> = flow {
         if (!locationRepository.hasLocationPermission()) {
             emitAll(preferencesRepository.preferences.map { MyPollenResult.LocationPermissionRequired(it.name) })
             return@flow

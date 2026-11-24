@@ -11,3 +11,6 @@ data object ForecastRoute : NavKey
 
 @Serializable
 data object ProfileRoute : NavKey
+
+@Serializable
+data object LocationSearchRoute : NavKey
