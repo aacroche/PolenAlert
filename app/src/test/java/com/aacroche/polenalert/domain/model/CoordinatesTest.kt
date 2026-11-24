@@ -10,7 +10,7 @@ class CoordinatesTest {
     private val sevilla = Coordinates(37.3891, -5.9845)
 
     @Test
-    fun `distanceKmTo a mismo punto es 0`() {
+    fun `distanceKmTo to mismo same point is zero`{
         val madrid = Coordinates(40.4168, -3.7038)
 
         val distance = madrid.distanceKmTo(madrid)
@@ -19,7 +19,7 @@ class CoordinatesTest {
     }
 
     @Test
-    fun `distanceKmTo de Madrid a Sevilla es aproximadamente 390 km`() {
+    fun `distanceKmTo from Madrid to Seville is 390 km`() {
         val madrid = Coordinates(40.4168, -3.7038)
         val sevilla = Coordinates(37.3891, -5.9845)
 
