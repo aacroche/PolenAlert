@@ -12,4 +12,6 @@ data class PollenDailyEntity(
     val type: PollenType,
     val dailyMean: Double,
     @ColumnInfo(defaultValue = "0") val fetchedAt: Instant,
+    @ColumnInfo(defaultValue = "0") val latitude: Double,
+    @ColumnInfo(defaultValue = "0") val longitude: Double,
 )

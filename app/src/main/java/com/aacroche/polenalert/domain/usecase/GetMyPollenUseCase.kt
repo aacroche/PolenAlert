@@ -65,11 +65,11 @@ class GetMyPollenUseCase @Inject constructor(
     private fun pollenFor(coordinates: Coordinates, force: Boolean): Flow<MyPollenResult> {
         val refreshState: Flow<DataResult<Unit>?> = flow {
             emit(null) // null = refrescando
-            emit(pollenRepository.refresh(coordinates.latitude, coordinates.longitude, force))
+            emit(pollenRepository.refresh(coordinates, force))
         }
 
         return combine(
-            pollenRepository.observeDailyPollen(),
+            pollenRepository.observeDailyPollen(coordinates),
             preferencesRepository.preferences,
             refreshState,
         ) { snapshot, prefs, refresh ->

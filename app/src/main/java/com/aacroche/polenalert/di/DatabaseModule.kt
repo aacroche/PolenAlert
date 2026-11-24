@@ -3,6 +3,7 @@ package com.aacroche.polenalert.di
 import android.content.Context
 import androidx.room.Room
 import com.aacroche.polenalert.data.local.MIGRATION_1_2
+import com.aacroche.polenalert.data.local.MIGRATION_2_3
 import com.aacroche.polenalert.data.local.PolenAlertDatabase
 import com.aacroche.polenalert.data.local.PollenDao
 import dagger.Module
@@ -19,7 +20,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): PolenAlertDatabase =
         Room.databaseBuilder(context, PolenAlertDatabase::class.java, "polenalert.db")
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides
