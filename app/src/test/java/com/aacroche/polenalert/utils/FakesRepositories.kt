@@ -56,12 +56,15 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
     private val _preferences = MutableStateFlow(UserPreferences())
     override val preferences: Flow<UserPreferences> = _preferences
 
-    fun setPreferences(prefs: UserPreferences) {
-        _preferences.value = prefs
-    }
+    var lastSavedName: String? = null
 
     override suspend fun setName(name: String) {
+        lastSavedName = name
         _preferences.value = _preferences.value.copy(name = name)
+    }
+
+    fun setPreferences(prefs: UserPreferences) {
+        _preferences.value = prefs
     }
 
     override suspend fun setAllergy(type: PollenType, enabled: Boolean) {
@@ -70,7 +73,7 @@ class FakeUserPreferencesRepository : UserPreferencesRepository {
         _preferences.value = _preferences.value.copy(allergies = currentAllergies)
     }
 
-    override suspend fun setManualPlace(place: com.aacroche.polenalert.domain.model.Place?) {
+    override suspend fun setManualPlace(place: Place?) {
         _preferences.value = _preferences.value.copy(manualPlace = place)
     }
 }

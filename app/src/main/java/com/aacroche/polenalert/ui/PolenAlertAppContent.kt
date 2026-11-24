@@ -81,7 +81,7 @@ fun PolenAlertAppContent() {
             ),
             entryProvider = entryProvider {
                 entry<TodayRoute> { TodayDestination(onOpenProfile = openProfile, onSearchLocation = searchLocation)}
-                entry<ForecastRoute> { ForecastDestination(onOpenProfile =  openProfile) }
+                entry<ForecastRoute> { ForecastDestination(onOpenProfile =  openProfile, onSearchLocation = searchLocation) }
                 entry<ProfileRoute> { ProfileDestination() }
                 entry<LocationSearchRoute> { LocationSearchDestination(onBack = { backStack.removeLastOrNull() }) }
             }

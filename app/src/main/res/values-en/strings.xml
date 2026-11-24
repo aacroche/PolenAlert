@@ -88,7 +88,7 @@
     <string name="location_description">Allow access to your location to see data for your area. If you prefer, choose a location manually.</string>
     <string name="location_permission_text_button">Allow location</string>
     <string name="location_manual_text_button">Choose location manually</string>
-    <string name="location_unavailable">Localización no disponible</string>
+    <string name="location_unavailable">Unavailable location</string>
     <string name="location_search_title">Choose location</string>
     <string name="location_search_hint">Search for a city</string>
     <string name="location_use_current">Use my current location</string>

@@ -4,7 +4,7 @@ import com.aacroche.polenalert.domain.model.DataError
 import com.aacroche.polenalert.domain.model.Place
 
 
-interface LocationSearchUiState {
+sealed interface LocationSearchUiState {
     data object Idle : LocationSearchUiState
     data object Loading : LocationSearchUiState
     data class Results(val places: List<Place>) : LocationSearchUiState

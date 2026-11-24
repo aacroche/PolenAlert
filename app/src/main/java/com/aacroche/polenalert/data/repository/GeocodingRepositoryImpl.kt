@@ -32,8 +32,6 @@ class GeocodingRepositoryImpl @Inject constructor(
             DataResult.Error(DataError.SERVER)
         } catch (e: SerializationException) {
             DataResult.Error(DataError.UNKNOWN)
-        } catch (e: Exception) {
-            DataResult.Error(DataError.UNKNOWN)
         }
     }
 }
