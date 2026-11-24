@@ -15,15 +15,18 @@ interface PollenDao {
     @Upsert
     suspend fun upsertAll(rows: List<PollenDailyEntity>)
 
-    @Query("DELETE FROM pollen_daily WHERE date < :before")
-    suspend fun deleteOlderThan(before: LocalDate)
+    @Query("DELETE FROM pollen_daily")
+    suspend fun deleteAll()
 
     @Transaction
-    suspend fun replaceFrom(today: LocalDate, rows: List<PollenDailyEntity>) {
-        deleteOlderThan(today)
+    suspend fun replaceAll(rows: List<PollenDailyEntity>) {
+        deleteAll()
         upsertAll(rows)
     }
 
     @Query("SELECT MIN(fetchedAt) FROM pollen_daily WHERE date >= :from")
     suspend fun oldestFetchedAt(from: LocalDate): Long?
+
+    @Query("SELECT latitude, longitude FROM pollen_daily WHERE date >= :from LIMIT 1")
+    suspend fun cachedLocation(from: LocalDate): CachedLocation?
 }

@@ -40,10 +40,10 @@ class FakePollenRepository : PollenRepository {
             }
         }
 
-    override fun observeDailyPollen(): Flow<PollenSnapshot> =
+    override fun observeDailyPollen(coordinates: com.aacroche.polenalert.domain.model.Coordinates): Flow<PollenSnapshot> =
         combine(days, fetchedAt) { d, f -> PollenSnapshot(d, f) }
 
-    override suspend fun refresh(latitude: Double, longitude: Double, force: Boolean): DataResult<Unit> {
+    override suspend fun refresh(coordinates: com.aacroche.polenalert.domain.model.Coordinates, force: Boolean): DataResult<Unit> {
         calls++
         refreshGate?.await()
         return refreshResult

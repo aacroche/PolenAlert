@@ -33,7 +33,7 @@ class PollenEntityMapperTest {
             )
         )
 
-        val result = original.toEntities(java.time.Instant.EPOCH).toDomain()
+        val result = original.toEntities(java.time.Instant.EPOCH, com.aacroche.polenalert.domain.model.Coordinates(40.42, -3.70)).toDomain()
 
         assertEquals(original, result)
     }
@@ -43,8 +43,8 @@ class PollenEntityMapperTest {
         val older = Instant.parse("2026-11-22T08:00:00Z")
         val newer = Instant.parse("2026-11-22T09:00:00Z")
         val rows = listOf(
-            PollenDailyEntity(LocalDate.of(2026, 11, 22), PollenType.GRASS, 10.0, newer),
-            PollenDailyEntity(LocalDate.of(2026, 11, 22), PollenType.OLIVE, 20.0, older),
+            PollenDailyEntity(LocalDate.of(2026, 11, 22), PollenType.GRASS, 10.0, newer, latitude = 40.42, longitude = -3.70),
+            PollenDailyEntity(LocalDate.of(2026, 11, 22), PollenType.OLIVE, 20.0, older, latitude = 40.42, longitude = -3.70),
         )
 
         assertEquals(older, rows.toSnapshot().fetchedAt)
